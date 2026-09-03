@@ -130,19 +130,35 @@ icon font.
 
 ---
 
-## Phase 2 — Publish to GitHub Pages
+## Phase 2 — Publish to GitHub Pages — ✅ COMPLETE
 
 Deliberately before the mobile work: a public URL is how the responsive work actually gets
 tested — on a real phone, not a devtools emulator.
 
-- [ ] Enable Pages with **GitHub Actions** as the source (no `gh-pages` branch, no `autopublish.sh`)
-- [ ] `.github/workflows/deploy.yml` — build on push to `main`, `actions/upload-pages-artifact` + `deploy-pages`
-- [ ] Set Vite `base: '/elevatorsaga/'` for the project-pages subpath (env-switched so `dev` stays at `/`)
-- [ ] Verify no absolute `/`-rooted asset paths survive the port
-- [ ] Add PR preview builds (build-only check; optional: artifact upload)
-- [ ] Add the live URL to the README and the repo's About field
+- [x] Enable Pages with **GitHub Actions** as the source (no `gh-pages` branch, no `autopublish.sh`)
+- [x] `.github/workflows/deploy.yml` — build on push to `main`, `actions/upload-pages-artifact` + `deploy-pages`
+- [x] Set Vite `base: '/elevatorsaga/'` for the project-pages subpath (env-switched so `dev` stays at `/`)
+- [x] Verify no absolute `/`-rooted asset paths survive the port
+- [x] Add PR preview builds (build-only check; optional: artifact upload)
+- [x] Add the live URL to the README and the repo's About field
 
 **Exit criteria:** pushing to `main` publishes to `https://richdr.github.io/elevatorsaga/` within a couple of minutes.
+
+**Outcome:** met. The site is live at
+**[richdr.github.io/elevatorsaga](https://richdr.github.io/elevatorsaga/)**, deployed by
+`.github/workflows/deploy.yml` on every push to `main`. Both pages return 200 and the game was
+verified running on the live URL — challenge 1 renders, users spawn, the counter advances, no
+console errors.
+
+Two notes:
+
+- `base` had to key off `isPreview` as well as `command`. `vite preview` serves the built
+  output, so it needs the same base the build baked into the asset URLs; only the dev server
+  runs at the root. Without this, local previews of a production build 404 on every asset.
+- The inherited `gh-pages` branch is now deleted — Pages builds from the workflow, not a
+  branch. Upstream's three abandoned experiment branches (`angularized`, `floorpassing`,
+  `gotoforce`) are still there; they are recoverable from `upstream` whenever you want them
+  gone.
 
 ---
 
