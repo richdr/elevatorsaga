@@ -47,7 +47,11 @@ export const renderFeedback = (title: string, message: string, url: string): HTM
             <p class="emphasis-color">${escapeHtml(message)}</p>
             ${
                 url
-                    ? `<a href="${escapeHtml(url)}" class="emphasis-color">Next challenge ${icon("caretRight", "blink")}</a>`
+                    ? // Deliberately not `emphasis-color`: that class is coloured by
+                      // `.feedback .emphasis-color`, whose specificity beats
+                      // `.feedback a`, so the link would take the emphasis colour
+                      // instead of its button ink and end up unreadable.
+                      `<a href="${escapeHtml(url)}" class="feedback_next">Next challenge ${icon("caretRight", "blink")}</a>`
                     : ""
             }
         </div>

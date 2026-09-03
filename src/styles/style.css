@@ -902,17 +902,26 @@ button.primary:hover {
     font-size: clamp(14px, 3.6vw, 18px);
 }
 
+/* Styled as a primary button, matching Apply: the accent fill with the ink
+ * that contrasts against it - white in the light scheme, near-black on the
+ * brighter teal of the dark one. */
 .feedback a {
     min-height: var(--tap);
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 0 14px;
+    padding: 0 16px;
     font-size: clamp(14px, 3.6vw, 17px);
+    font-weight: 600;
     color: var(--accent-ink);
     background-color: var(--accent);
     border-radius: var(--radius);
     text-decoration: none;
+}
+
+.feedback a:hover {
+    text-decoration: none;
+    filter: brightness(1.08);
 }
 
 /* ---------------------------------------------------------------------------
