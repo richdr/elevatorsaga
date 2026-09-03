@@ -96,9 +96,10 @@ export interface WorldScaler {
 
 /**
  * Below this scale the people become unreadable smudges, so we stop shrinking
- * and let the viewport scroll instead.
+ * and let the viewport scroll instead. 0.3 is low enough that the tallest
+ * challenge - 21 floors - still fits a phone whole.
  */
-const MIN_SCALE = 0.34;
+const MIN_SCALE = 0.3;
 
 /**
  * Fits the world into the space available by scaling it, rather than by

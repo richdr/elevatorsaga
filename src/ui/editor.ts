@@ -12,7 +12,7 @@ import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
 import { Observable } from "../game/observable";
 import { getCodeObjFromCode, type UserCodeObject } from "../game/usercode";
 import { DEFAULT_CODE, DEVTEST_CODE } from "./default-code";
-import { solarizedDark, solarizedLight } from "./theme";
+import { consoleDark, solarizedLight } from "./theme";
 
 /**
  * Unchanged from the original on purpose: a player who has a solution in
@@ -45,7 +45,8 @@ export class CodeEditor extends Observable<EditorEvents> {
         super();
 
         const autoSave = debounce(() => this.save(), 1000);
-        const darkMode = window.matchMedia("(prefers-color-scheme: dark)");
+        // Dark is the default; a light colour scheme is the opt-out.
+        const lightMode = window.matchMedia("(prefers-color-scheme: light)");
 
         this.view = new EditorView({
             parent,
@@ -63,7 +64,14 @@ export class CodeEditor extends Observable<EditorEvents> {
                     // Wrapping matters more than column discipline on a phone,
                     // where there is no room to scroll sideways comfortably.
                     EditorView.lineWrapping,
-                    this.themeCompartment.of(darkMode.matches ? solarizedDark : solarizedLight),
+                    // The content div is a role="textbox" and needs a name.
+                    // Tab indents rather than moving focus, so the escape
+                    // mechanism is named here where a screen reader will read it.
+                    EditorView.contentAttributes.of({
+                        "aria-label":
+                            "Your elevator program. Press Escape then Tab to move focus out of the editor.",
+                    }),
+                    this.themeCompartment.of(lightMode.matches ? solarizedLight : consoleDark),
                     keymap.of([
                         ...closeBracketsKeymap,
                         ...defaultKeymap,
@@ -80,10 +88,10 @@ export class CodeEditor extends Observable<EditorEvents> {
             }),
         });
 
-        darkMode.addEventListener("change", (e) => {
+        lightMode.addEventListener("change", (e) => {
             this.view.dispatch({
                 effects: this.themeCompartment.reconfigure(
-                    e.matches ? solarizedDark : solarizedLight,
+                    e.matches ? solarizedLight : consoleDark,
                 ),
             });
         });

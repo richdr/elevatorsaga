@@ -18,13 +18,18 @@ export type IconName =
     | "female"
     | "male"
     | "minusSquare"
+    | "pause"
+    | "play"
     | "plusSquare"
     | "repeat"
     | "warning";
 
 interface Glyph {
-    advance: number;
+    /** Advance width, in the webfont's units. Unused when `viewBox` is set. */
+    advance?: number;
     path: string;
+    /** Set for hand-drawn icons, which use their own coordinate system. */
+    viewBox?: string;
 }
 
 const GLYPHS: Record<IconName, Glyph> = {
@@ -56,6 +61,16 @@ const GLYPHS: Record<IconName, Glyph> = {
         advance: 1536,
         path: "M0 160v960q0 119 84.5 203.5t203.5 84.5h960q119 0 203.5 -84.5t84.5 -203.5v-960q0 -119 -84.5 -203.5t-203.5 -84.5h-960q-119 0 -203.5 84.5t-84.5 203.5zM256 576q0 -26 19 -45t45 -19h896q26 0 45 19t19 45v128q0 26 -19 45t-45 19h-896q-26 0 -45 -19t-19 -45v-128 z",
     },
+    // Hand-drawn: the webfont subset we extracted does not include transport
+    // controls, and two triangles are not worth a dependency.
+    play: {
+        viewBox: "0 0 24 24",
+        path: "M8 5.5v13a1 1 0 0 0 1.54.84l10-6.5a1 1 0 0 0 0-1.68l-10-6.5A1 1 0 0 0 8 5.5z",
+    },
+    pause: {
+        viewBox: "0 0 24 24",
+        path: "M7 4h4v16H7zM13 4h4v16h-4z",
+    },
     plusSquare: {
         advance: 1536,
         path: "M0 160v960q0 119 84.5 203.5t203.5 84.5h960q119 0 203.5 -84.5t84.5 -203.5v-960q0 -119 -84.5 -203.5t-203.5 -84.5h-960q-119 0 -203.5 84.5t-84.5 203.5zM256 576q0 -26 19 -45t45 -19h320v-320q0 -26 19 -45t45 -19h128q26 0 45 19t19 45v320h320q26 0 45 19t19 45 v128q0 26 -19 45t-45 19h-320v320q0 26 -19 45t-45 19h-128q-26 0 -45 -19t-19 -45v-320h-320q-26 0 -45 -19t-19 -45v-128z",
@@ -77,10 +92,15 @@ const UNITS_PER_EM = 1792;
 export const icon = (name: IconName, className = ""): string => {
     const glyph = GLYPHS[name];
     const cls = ["icon", className].filter(Boolean).join(" ");
+    // Webfont glyphs are y-up and need flipping; hand-drawn ones are already
+    // in SVG's y-down space.
+    const viewBox = glyph.viewBox ?? `0 -${ASCENT} ${glyph.advance} ${UNITS_PER_EM}`;
+    const path = `<path d="${glyph.path}"/>`;
+    const body = glyph.viewBox ? path : `<g transform="scale(1,-1)">${path}</g>`;
     return (
-        `<svg class="${cls}" viewBox="0 -${ASCENT} ${glyph.advance} ${UNITS_PER_EM}"` +
+        `<svg class="${cls}" viewBox="${viewBox}"` +
         ` width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false">` +
-        `<g transform="scale(1,-1)"><path d="${glyph.path}"/></g></svg>`
+        `${body}</svg>`
     );
 };
 

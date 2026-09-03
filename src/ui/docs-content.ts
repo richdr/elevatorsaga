@@ -26,8 +26,12 @@ export const DOCS_HTML = String.raw`
 
     <h2>How to play</h2>
     <p>
-        Enter your code in the input window below the game view, and press the
-        <span class="emphasis-color">Apply</span> button to start the challenge.<br />
+        Enter your code in the editor and press the
+        <span class="emphasis-color">Apply</span> button to start the challenge. On a narrow
+        screen the editor and the building are separate tabs - use the
+        <span class="emphasis-color">Code</span> and
+        <span class="emphasis-color">Elevators</span> switch above them; applying your code
+        moves you back to the building automatically.<br />
         You can increase or decrease the speed of time by pressing the
         <span class="emphasis-color">+</span> and
         <span class="emphasis-color">&minus;</span> buttons.
@@ -50,16 +54,33 @@ export const DOCS_HTML = String.raw`
         <span class="emphasis-color">update</span>. Like this:
     </p>
     <div>
-                    <pre><code>{
-    init: function(elevators, floors) {
+                    <pre tabindex="0"><code>{
+    init(elevators, floors) {
         // Do stuff with the elevators and floors, which are both arrays of objects
     },
-    update: function(dt, elevators, floors) {
+    update(dt, elevators, floors) {
         // Do more stuff with the elevators and floors
         // dt is the number of game seconds that passed since the last time update was called
     }
 }</code></pre>
     </div>
+    <p>
+        In the editor, <span class="emphasis-color">Tab</span> inserts indentation. To move
+        keyboard focus out of the editor, press
+        <span class="emphasis-color">Escape</span> and then
+        <span class="emphasis-color">Tab</span>.
+    </p>
+    <p>
+        Your code runs directly in your browser, so any JavaScript your browser
+        understands will work - <span class="emphasis-color">const</span>, arrow functions,
+        destructuring, classes, <span class="emphasis-color">async</span> and so on.
+    </p>
+    <p>
+        The original version of this game bundled
+        <a href="https://lodash.com/">lodash</a> 3, and many published solutions use it.
+        It is still available as <span class="emphasis-color">_</span> so those solutions
+        keep working, but you do not need it.
+    </p>
     <p>
         These functions will then be called by the game during the challenge.<br />
         <span class="emphasis-color">init</span> will be called when the challenge
@@ -75,7 +96,7 @@ export const DOCS_HTML = String.raw`
     <h3>How to control an elevator</h3>
     <dl>
         <dt>
-                        <pre><code>elevator.goToFloor(1);</code></pre>
+                        <pre tabindex="0"><code>elevator.goToFloor(1);</code></pre>
         </dt>
         <dd>
             Tell the elevator to move to floor 1 after completing other tasks, if any.
@@ -83,7 +104,7 @@ export const DOCS_HTML = String.raw`
             to that floor.
         </dd>
         <dt>
-                        <pre><code>if(elevator.currentFloor() > 2) { ... }</code></pre>
+                        <pre tabindex="0"><code>if(elevator.currentFloor() > 2) { ... }</code></pre>
         </dt>
         <dd>
             Calling currentFloor gets the floor number that the elevator currently is
@@ -98,7 +119,7 @@ export const DOCS_HTML = String.raw`
     </p>
     <dl>
         <dt>
-                        <pre><code>elevator.on("idle", function() { elevator.goToFloor(0); });</code></pre>
+                        <pre tabindex="0"><code>elevator.on("idle", () => elevator.goToFloor(0));</code></pre>
         </dt>
         <dd>
             Listen for the "idle" event issued by the elevator, when the task queue has
@@ -106,7 +127,7 @@ export const DOCS_HTML = String.raw`
             to move to floor 0.
         </dd>
         <dt>
-                        <pre><code>elevator.on("floor_button_pressed", function(floorNum) { ... } );</code></pre>
+                        <pre tabindex="0"><code>elevator.on("floor_button_pressed", (floorNum) => { ... });</code></pre>
         </dt>
         <dd>
             Listen for the "floor_button_pressed" event, issued when a passenger pressed
@@ -114,7 +135,7 @@ export const DOCS_HTML = String.raw`
             to that floor.
         </dd>
         <dt>
-                        <pre><code>floor.on("up_button_pressed", function() { ... } );</code></pre>
+                        <pre tabindex="0"><code>floor.on("up_button_pressed", () => { ... });</code></pre>
         </dt>
         <dd>
             Listen for the "up_button_pressed" event, issued when a passenger pressed
@@ -125,7 +146,7 @@ export const DOCS_HTML = String.raw`
 
     <h2 id="docs">API documentation</h2>
     <h3>Elevator object</h3>
-    <div class="doctablewrap"><table class="doctable">
+    <div class="doctablewrap" tabindex="0"><table class="doctable">
         <thead>
             <th width="150">Property</th>
             <th width="90">Type</th>
@@ -144,7 +165,7 @@ export const DOCS_HTML = String.raw`
                     >
                 </td>
                 <td>
-                                <pre><code>elevator.goToFloor(3); // Do it after anything else
+                                <pre tabindex="0"><code>elevator.goToFloor(3); // Do it after anything else
 elevator.goToFloor(2, true); // Do it before anything else</code></pre>
                 </td>
             </tr>
@@ -161,7 +182,7 @@ elevator.goToFloor(2, true); // Do it before anything else</code></pre>
                     >
                 </td>
                 <td>
-                                <pre><code>elevator.stop();</code></pre>
+                                <pre tabindex="0"><code>elevator.stop();</code></pre>
                 </td>
             </tr>
             <tr>
@@ -173,7 +194,7 @@ elevator.goToFloor(2, true); // Do it before anything else</code></pre>
                     >
                 </td>
                 <td>
-                                <pre><code>if(elevator.currentFloor() === 0) {
+                                <pre tabindex="0"><code>if(elevator.currentFloor() === 0) {
     // Do something special?
 }</code></pre>
                 </td>
@@ -188,7 +209,7 @@ elevator.goToFloor(2, true); // Do it before anything else</code></pre>
                     >
                 </td>
                 <td>
-                                <pre><code>if(elevator.goingUpIndicator()) {
+                                <pre tabindex="0"><code>if(elevator.goingUpIndicator()) {
     elevator.goingDownIndicator(false);
 }</code></pre>
                 </td>
@@ -203,7 +224,7 @@ elevator.goToFloor(2, true); // Do it before anything else</code></pre>
                     >
                 </td>
                 <td>
-                                <pre><code>if(elevator.goingDownIndicator()) {
+                                <pre tabindex="0"><code>if(elevator.goingDownIndicator()) {
     elevator.goingUpIndicator(false);
 }</code></pre>
                 </td>
@@ -218,7 +239,7 @@ elevator.goToFloor(2, true); // Do it before anything else</code></pre>
                     >
                 </td>
                 <td>
-                                <pre><code>if(elevator.maxPassengerCount() > 5) {
+                                <pre tabindex="0"><code>if(elevator.maxPassengerCount() > 5) {
     // Use this elevator for something special, because it's big
 }</code></pre>
                 </td>
@@ -234,7 +255,7 @@ elevator.goToFloor(2, true); // Do it before anything else</code></pre>
                     >
                 </td>
                 <td>
-                                <pre><code>if(elevator.loadFactor() &lt; 0.4) {
+                                <pre tabindex="0"><code>if(elevator.loadFactor() &lt; 0.4) {
     // Maybe use this elevator, since it's not full yet?
 }</code></pre>
                 </td>
@@ -261,7 +282,7 @@ elevator.goToFloor(2, true); // Do it before anything else</code></pre>
                     >
                 </td>
                 <td>
-                                <pre><code>elevator.destinationQueue = [];
+                                <pre tabindex="0"><code>elevator.destinationQueue = [];
 elevator.checkDestinationQueue();</code></pre>
                 </td>
             </tr>
@@ -276,7 +297,7 @@ elevator.checkDestinationQueue();</code></pre>
                     >
                 </td>
                 <td>
-                                <pre><code>elevator.checkDestinationQueue();</code></pre>
+                                <pre tabindex="0"><code>elevator.checkDestinationQueue();</code></pre>
                 </td>
             </tr>
             <tr>
@@ -286,14 +307,14 @@ elevator.checkDestinationQueue();</code></pre>
                     <small>Gets the currently pressed floor numbers as an array.</small>
                 </td>
                 <td>
-                                <pre><code>if(elevator.getPressedFloors().length > 0) {
+                                <pre tabindex="0"><code>if(elevator.getPressedFloors().length > 0) {
     // Maybe go to some chosen floor first?
 }</code></pre>
                 </td>
             </tr>
         </tbody>
     </table></div>
-    <div class="doctablewrap"><table class="doctable">
+    <div class="doctablewrap" tabindex="0"><table class="doctable">
         <thead>
             <th width="150">Event</th>
             <th width="280">Explanation</th>
@@ -309,7 +330,7 @@ elevator.checkDestinationQueue();</code></pre>
                     >
                 </td>
                 <td>
-                                <pre><code>elevator.on("idle", function() { ... });</code></pre>
+                                <pre tabindex="0"><code>elevator.on("idle", () => { ... });</code></pre>
                 </td>
             </tr>
             <tr>
@@ -321,7 +342,7 @@ elevator.checkDestinationQueue();</code></pre>
                     >
                 </td>
                 <td>
-                                <pre><code>elevator.on("floor_button_pressed", function(floorNum) {
+                                <pre tabindex="0"><code>elevator.on("floor_button_pressed", (floorNum) => {
     // Maybe tell the elevator to go to that floor?
 })</code></pre>
                 </td>
@@ -337,7 +358,7 @@ elevator.checkDestinationQueue();</code></pre>
                     >
                 </td>
                 <td>
-                                <pre><code>elevator.on("passing_floor", function(floorNum, direction) { ... });</code></pre>
+                                <pre tabindex="0"><code>elevator.on("passing_floor", (floorNum, direction) => { ... });</code></pre>
                 </td>
             </tr>
             <tr>
@@ -346,7 +367,7 @@ elevator.checkDestinationQueue();</code></pre>
                     <small>Triggered when the elevator has arrived at a floor.</small>
                 </td>
                 <td>
-                                <pre><code>elevator.on("stopped_at_floor", function(floorNum) {
+                                <pre tabindex="0"><code>elevator.on("stopped_at_floor", (floorNum) => {
     // Maybe decide where to go next?
 })</code></pre>
                 </td>
@@ -354,7 +375,7 @@ elevator.checkDestinationQueue();</code></pre>
         </tbody>
     </table></div>
     <h3>Floor object</h3>
-    <div class="doctablewrap"><table class="doctable">
+    <div class="doctablewrap" tabindex="0"><table class="doctable">
         <thead>
             <th width="150">Property</th>
             <th width="90">Type</th>
@@ -367,12 +388,12 @@ elevator.checkDestinationQueue();</code></pre>
                 <td>function</td>
                 <td><small>Gets the floor number of the floor object.</small></td>
                 <td>
-                                <pre><code>if(floor.floorNum() > 3) { ... }</code></pre>
+                                <pre tabindex="0"><code>if(floor.floorNum() > 3) { ... }</code></pre>
                 </td>
             </tr>
         </tbody>
     </table></div>
-    <div class="doctablewrap"><table class="doctable">
+    <div class="doctablewrap" tabindex="0"><table class="doctable">
         <thead>
             <th width="150">Event</th>
             <th width="280">Explanation</th>
@@ -389,7 +410,7 @@ elevator.checkDestinationQueue();</code></pre>
                     >
                 </td>
                 <td>
-                                <pre><code>floor.on("up_button_pressed", function() {
+                                <pre tabindex="0"><code>floor.on("up_button_pressed", () => {
     // Maybe tell an elevator to go to this floor?
 })</code></pre>
                 </td>
@@ -404,7 +425,7 @@ elevator.checkDestinationQueue();</code></pre>
                     >
                 </td>
                 <td>
-                                <pre><code>floor.on("down_button_pressed", function() {
+                                <pre tabindex="0"><code>floor.on("down_button_pressed", () => {
     // Maybe tell an elevator to go to this floor?
 })</code></pre>
                 </td>

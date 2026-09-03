@@ -257,6 +257,65 @@ lodash kept for player compatibility. Worth revisiting in phase 4 if it matters.
 
 ---
 
+## Phase 3b — ES6 player code and a fresher look — ✅ COMPLETE
+
+Two follow-ups requested after phase 3 shipped.
+
+### ES6-ify the code the player writes
+
+The samples were ES5 with lodash, which is a decade out of date as a thing to teach.
+
+- [x] `DEFAULT_CODE` and `DEVTEST_CODE` rewritten with `const`, arrow functions, method
+      shorthand and native array methods — no lodash
+- [x] Every code sample in the documentation moved to arrow functions and method shorthand
+- [x] Docs now state that any JavaScript the browser understands works, and that `_` remains
+      available for solutions written against the original
+- [x] Tests: modern syntax (method shorthand, arrows, destructuring, spread, classes, template
+      literals) parses; the original ES5-with-lodash style still parses; and **both shipped
+      samples are executed against the real simulation**, so a typo in a sample string cannot
+      ship silently again
+
+`_` is still installed for player code and still shimmed to lodash 3 semantics. Nothing that
+worked before stops working; we just no longer teach it.
+
+### Fresher visual look — "engineering console"
+
+- [x] Dark by default, light as the alternate scheme. The lift shaft is dark in both, so only
+      the chrome changes
+- [x] New palette: `#16181d` chrome, `#0f1115` shaft, teal `#2dd4bf` car and accents, lime
+      `#a3e635` for activated indicators
+- [x] Type roles separated: Oswald for the title and headings only, the system UI stack for
+      prose and controls, monospace for data and code. Oswald is a condensed display face and
+      was being used for paragraphs
+- [x] Challenge bar restructured: `CHALLENGE 01` as a tracked-out mono label above the
+      objective, rather than one run-on heading
+- [x] Play/pause/restart icons on the start button, hand-drawn since the webfont subset we
+      extracted has no transport controls
+- [x] A Console Dark editor theme built from the same tokens as the app, replacing Solarized
+      Dark — its cyan-tinted background clashed with the cooler slate
+- [x] Panels, buttons and the timescale stepper reworked as bordered surfaces with a
+      consistent radius scale
+
+**Accessibility, found by adding axe-core across both colour schemes and all three views** —
+Lighthouse had only ever audited the initial view, and missed all of this:
+
+| Finding                                                                                                                             | Fix                                                                                                       |
+| ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `.cm-content` is a `role="textbox"` with no accessible name                                                                         | `aria-label` via `contentAttributes`                                                                      |
+| Solarized Light fails AA on its own background — comments at 2.3:1, most accents near 3:1, and even its default foreground at 3.9:1 | same hues, darkened to clear 4.5:1                                                                        |
+| Console Dark's muted grey at 3.9:1                                                                                                  | lifted to 4.8:1                                                                                           |
+| Scrollable code samples and API tables unreachable by keyboard                                                                      | `tabindex="0"`                                                                                            |
+| `Tab` indents in the editor rather than moving focus — a keyboard trap unless the escape is discoverable                            | verified `Escape` then `Tab` escapes both ways, and named it in the editor's `aria-label` and in the docs |
+
+One axe finding is left and is a false positive: `scrollable-region-focusable` on `.cm-scroller`.
+Verified by keyboard that the editor is reachable by `Tab` and scrolls with the arrow keys;
+adding `tabindex` to the scroller would only add a useless extra tab stop.
+
+Lighthouse, mobile, production build: **performance 97, accessibility 100, best practices 100,
+SEO 100, CLS 0**.
+
+---
+
 ## Phase 4 — Nice-to-haves (only after 0–3 ship)
 
 - [ ] Challenge progress persisted + a challenge picker (currently URL-hash driven)

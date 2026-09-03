@@ -12,98 +12,108 @@
  * ------------------------------------------------------------------------- */
 
 :root {
-    --page-bg: #bfbd9f;
-    /* Darker than the original's #555, which only reached 3.9:1 on this
-     * background. #444 clears 4.5:1 and is visually indistinguishable. */
-    --text: #444;
-    --text-strong: #2e2e28;
-    --text-muted: #55544a;
-    /* Light emphasis, for text sitting on the dark world. */
-    --emphasis: #f1f2d8;
-    --emphasis-shadow: #555;
-    /* Emphasis on the page background, where the light variant managed 1.67:1. */
-    --emphasis-page: #33301a;
-    --error: #dd5544;
+    color-scheme: dark light;
 
-    --world-bg: #333;
-    --world-line: #333;
-    --floor-tint-a: rgba(255, 255, 255, 0.1);
-    --floor-tint-b: rgba(255, 255, 255, 0.2);
-    --floor-tint-c: rgba(255, 255, 255, 0.24);
-    --floor-number: rgba(255, 255, 255, 0.15);
-    --indicator-idle: rgba(255, 255, 255, 0.2);
-    --indicator-active: #33ff44;
-    --elevator-bg: #4f8686;
-    --elevator-border: #fff;
-    --user-color: #fff;
+    /* Chrome */
+    --page-bg: #16181d;
+    --surface: #1c1f26;
+    --surface-2: #22262e;
+    --surface-3: #2b303a;
+    --border: rgba(255, 255, 255, 0.09);
+    --border-strong: rgba(255, 255, 255, 0.18);
 
-    --stats-text: #999;
-    --stats-line: #444;
+    --text: #c9d1d9;
+    --text-strong: #e6edf3;
+    --text-muted: #8b96a2;
 
-    /* #333 on #777 was 2.82:1. A slightly darker chip with light text reads at
-     * 4.8:1 and keeps the original's grey. */
-    --button-bg: #6a6a62;
-    --button-text: #f5f4ea;
-    --button-border: #55554e;
-    --button-bg-hover: #787870;
-    --button-primary-bg: #4f8686;
-    --button-primary-text: #f1f2d8;
-    --button-primary-border: #3d6a6a;
+    --accent: #2dd4bf;
+    --accent-text: #2dd4bf;
+    --accent-ink: #06231f;
+    --active: #a3e635;
+    --error: #f87171;
 
-    --editor-border: #a9a892;
-    --editor-border-focus: #857f5f;
+    /* The shaft stays dark in both colour schemes - it is a lift shaft. */
+    --world-bg: #0f1115;
+    --world-line: #06070a;
+    --floor-tint-a: rgba(255, 255, 255, 0.03);
+    --floor-tint-b: rgba(255, 255, 255, 0.06);
+    --floor-tint-c: rgba(255, 255, 255, 0.085);
+    --floor-number: rgba(255, 255, 255, 0.14);
+    --indicator-idle: rgba(255, 255, 255, 0.18);
+    --indicator-active: var(--active);
+    --elevator-bg: #1b5e5a;
+    --elevator-border: #2dd4bf;
+    --elevator-ink: rgba(255, 255, 255, 0.55);
+    --user-color: #eef2f4;
 
-    --focus-ring: #2c6e8f;
+    /* The stats sit on the dark shaft, so like the shaft itself they do not
+     * follow the colour scheme. */
+    --stats-text: #8b96a2;
+    --stats-value: #e8eef3;
+    --stats-line: rgba(255, 255, 255, 0.09);
+    --stats-border: rgba(255, 255, 255, 0.24);
 
-    /* Solarized, for the documentation's code samples. */
-    --code-bg: #fdf6e3;
-    --code-text: #657b83;
-    --code-keyword: #859900;
-    --code-string: #2aa198;
-    --code-comment: #93a1a1;
-    --code-number: #d33682;
-    --code-name: #268bd2;
-    --code-literal: #b58900;
+    --button-bg: var(--surface-2);
+    --button-text: var(--text);
+    --button-border: var(--border-strong);
+    --button-bg-hover: var(--surface-3);
+
+    --editor-border: var(--border);
+    --editor-border-focus: var(--accent);
+
+    --focus-ring: var(--accent);
+
+    /* Solarized-ish, for the documentation's code samples. */
+    --code-bg: #0f1115;
+    --code-text: #c9d1d9;
+    --code-keyword: #a3e635;
+    --code-string: #2dd4bf;
+    --code-comment: #8b96a2;
+    --code-number: #fbbf24;
+    --code-name: #7dd3fc;
+    --code-literal: #fbbf24;
 
     /* Minimum touch target, per the usual 44px guidance. */
     --tap: 44px;
-    --radius: 6px;
+    --radius: 8px;
+    --radius-lg: 12px;
     --gap: 10px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    /* Oswald is a condensed display face - good for the title and headings,
+     * poor for paragraphs. Prose gets the system UI stack. */
+    --font-display: Oswald, "Arial Narrow", Arial, sans-serif;
+    --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
+/* Light is the alternate scheme. The shaft does not change - only the chrome. */
+@media (prefers-color-scheme: light) {
     :root {
-        --page-bg: #2f2e29;
-        --text: #c9c7b4;
-        --text-strong: #e6e4d4;
-        --text-muted: #9a9884;
-        --emphasis: #f1f2d8;
-        --emphasis-page: #f1f2d8;
-        --emphasis-shadow: #000;
+        --page-bg: #f3f5f6;
+        --surface: #ffffff;
+        --surface-2: #e9edef;
+        --surface-3: #dde3e6;
+        --border: rgba(0, 0, 0, 0.12);
+        --border-strong: rgba(0, 0, 0, 0.22);
 
-        --world-bg: #1e1e1c;
-        --world-line: #111;
-        --floor-tint-a: rgba(255, 255, 255, 0.05);
-        --floor-tint-b: rgba(255, 255, 255, 0.11);
-        --floor-tint-c: rgba(255, 255, 255, 0.14);
-        --floor-number: rgba(255, 255, 255, 0.12);
+        --text: #3a4046;
+        --text-strong: #1c2126;
+        --text-muted: #5b666e;
 
-        --stats-text: #8d8b7c;
-        --stats-line: #3a3934;
+        /* Dark enough that white text on it clears 4.5:1. */
+        --accent: #0b7070;
+        --accent-text: #0b6b6b;
+        --accent-ink: #ffffff;
+        --error: #b3261e;
 
-        --button-bg: #56554e;
-        --button-text: #f0eee0;
-        --button-border: #6b695f;
-        --button-bg-hover: #63625a;
-
-        --editor-border: #4a4943;
-        --editor-border-focus: #6f6d62;
-
-        --focus-ring: #6fb3d2;
-
-        --code-bg: #002b36;
-        --code-text: #839496;
-        --code-comment: #586e75;
+        /* Same hues as Solarized Light, darkened to clear 4.5:1 on #fdf6e3. */
+        --code-bg: #fdf6e3;
+        --code-text: #586e75;
+        --code-keyword: #5f7000;
+        --code-string: #1a6f6a;
+        --code-comment: #5f6e6e;
+        --code-number: #a3255f;
+        --code-name: #1a6ea8;
+        --code-literal: #7a5c00;
     }
 }
 
@@ -126,7 +136,7 @@ body {
 }
 
 body {
-    font-family: Oswald, Arial, Helvetica, sans-serif;
+    font-family: var(--font-ui);
     /* Stop iOS Safari inflating text in landscape. */
     -webkit-text-size-adjust: 100%;
 }
@@ -138,6 +148,7 @@ h4,
 h5 {
     margin: 0.4em 0 0.3em;
     color: var(--text);
+    font-family: var(--font-display);
     font-weight: normal;
 }
 
@@ -159,20 +170,16 @@ a:hover {
     text-decoration: underline;
 }
 
+/* Numbers and key values in prose. Bright on the shaft, the accent elsewhere. */
 .emphasis-color {
-    color: var(--emphasis);
-    text-shadow: 0 2px 0.4pt var(--emphasis-shadow);
+    color: var(--emphasis, var(--text-strong));
+    font-weight: 600;
 }
 
-/* On the page background the light emphasis colour is unreadable, so it becomes
- * a darker accent instead, carrying the emphasis with weight rather than glow. */
 .challengetitle .emphasis-color,
-.timescale .emphasis-color,
 .help .emphasis-color,
 .sheet_body .emphasis-color {
-    color: var(--emphasis-page);
-    font-weight: 700;
-    text-shadow: none;
+    color: var(--accent-text);
 }
 
 .error-color {
@@ -203,29 +210,43 @@ a:hover {
  * ------------------------------------------------------------------------- */
 
 button {
-    min-height: 32px;
-    padding: 6px 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 34px;
+    padding: 7px 14px;
     font: inherit;
-    font-size: 16px;
-    font-weight: bold;
+    font-size: 15px;
+    font-weight: 500;
     line-height: 1.2;
     color: var(--button-text);
     background-color: var(--button-bg);
-    border: 1px solid var(--button-border);
+    border: 1px solid var(--border);
     border-radius: var(--radius);
     cursor: pointer;
     /* No 300ms tap delay, and no double-tap-to-zoom on controls. */
     touch-action: manipulation;
+    transition:
+        background-color 0.12s ease,
+        border-color 0.12s ease;
 }
 
 button:hover {
     background-color: var(--button-bg-hover);
+    border-color: var(--border-strong);
 }
 
 button.primary {
-    color: var(--button-primary-text);
-    background-color: var(--button-primary-bg);
-    border-color: var(--button-primary-border);
+    color: var(--accent-ink);
+    background-color: var(--accent);
+    border-color: transparent;
+    font-weight: 600;
+}
+
+button.primary:hover {
+    background-color: var(--accent);
+    filter: brightness(1.08);
 }
 
 /* A button that is nothing but an icon - no chrome, inherits its colour so the
@@ -254,10 +275,18 @@ button.primary {
     padding: 0;
     background: none;
     border: none;
-    color: var(--text-strong);
+    color: var(--text-muted);
     font: inherit;
-    font-weight: bold;
+    /* Form controls do not inherit text-transform from the UA stylesheet. */
+    text-transform: inherit;
+    letter-spacing: inherit;
     cursor: pointer;
+}
+
+.linkbutton:hover {
+    background: none;
+    border-color: transparent;
+    color: var(--accent-text);
 }
 
 .linkbutton:hover {
@@ -299,26 +328,55 @@ button.primary {
 .header {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     gap: var(--gap);
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
 }
 
 .title {
+    font-family: var(--font-display);
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
     margin: 0;
-    font-size: clamp(20px, 4.5vw, 34px);
-    color: var(--text);
+    font-size: clamp(20px, 4.5vw, 30px);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    /* Lower case, in the manner of a tool rather than a title screen. */
+    text-transform: lowercase;
+    color: var(--text-strong);
 }
 
 .title em {
-    font-size: 0.62em;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
 }
 
 .headerlinks {
     display: flex;
     align-items: center;
-    gap: 16px;
-    font-size: 18px;
+    gap: 18px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.headerlinks a {
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.headerlinks a:hover {
+    color: var(--accent-text);
+    text-decoration: none;
 }
 
 .footer {
@@ -350,9 +408,28 @@ button.primary {
     min-height: 40px;
 }
 
+.challengemeta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.challengelabel {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
 .challengetitle {
     margin: 0;
-    font-size: clamp(15px, 3.6vw, 20px);
+    font-family: var(--font-ui);
+    font-size: clamp(14px, 3.2vw, 17px);
+    font-weight: 400;
+    color: var(--text-strong);
 }
 
 .challengecontrols {
@@ -363,15 +440,27 @@ button.primary {
 }
 
 .startstop {
-    min-width: 104px;
+    min-width: 116px;
     min-height: var(--tap);
 }
 
+.startstop .icon {
+    font-size: 0.8em;
+    color: var(--accent);
+}
+
+.startstop:hover .icon {
+    color: var(--accent);
+}
+
+/* One chip holding the two steppers and the current multiplier. */
 .timescale {
     display: flex;
     align-items: center;
-    gap: 2px;
-    color: var(--text);
+    background-color: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
 }
 
 .timescale .iconbutton {
@@ -379,14 +468,23 @@ button.primary {
     place-items: center;
     width: var(--tap);
     height: var(--tap);
-    font-size: 20px;
+    font-size: 15px;
+    color: var(--text-muted);
+}
+
+.timescale .iconbutton:hover {
+    color: var(--text-strong);
+    background-color: var(--surface-3);
 }
 
 .timescale_value {
     display: inline-block;
-    min-width: 30px;
+    min-width: 34px;
     text-align: center;
-    font-size: 20px;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-strong);
 }
 
 /* ---------------------------------------------------------------------------
@@ -397,7 +495,8 @@ button.primary {
 .viewtoggle {
     display: none;
     margin-bottom: 10px;
-    border: 1px solid var(--button-border);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
     border-radius: var(--radius);
     overflow: hidden;
 }
@@ -407,17 +506,30 @@ button.primary {
     min-height: var(--tap);
     border: none;
     border-radius: 0;
+    border-bottom: 2px solid transparent;
     background-color: transparent;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.viewtoggle_option:hover {
+    background-color: var(--surface-2);
+    border-color: transparent;
+    border-bottom-color: transparent;
     color: var(--text);
 }
 
 .viewtoggle_option + .viewtoggle_option {
-    border-left: 1px solid var(--button-border);
+    border-left: 1px solid var(--border);
 }
 
 .viewtoggle_option[aria-selected="true"] {
-    background-color: var(--button-bg);
-    color: var(--button-text);
+    background-color: var(--surface-2);
+    border-bottom-color: var(--accent);
+    color: var(--text-strong);
 }
 
 /* ---------------------------------------------------------------------------
@@ -438,15 +550,21 @@ button.primary {
 
 /* A floor is 50px; three of them is the smallest challenge. Reserving that much
  * keeps the load from shifting once the world is measured. */
+/* A floor is 50px; three of them is the smallest challenge. Reserving that much
+ * keeps the load from shifting once the world is measured. */
 .world {
     position: relative;
     min-height: 150px;
     display: flex;
     flex-wrap: wrap;
     background-color: var(--world-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
     overflow: hidden;
 }
 
+/* Scrollable window onto the world. The world itself keeps the engine's fixed
+ * pixel geometry and is scaled to fit, so no gameplay maths changes. */
 /* Scrollable window onto the world. The world itself keeps the engine's fixed
  * pixel geometry and is scaled to fit, so no gameplay maths changes. */
 .worldviewport {
@@ -456,8 +574,6 @@ button.primary {
     place-content: center;
     overflow: auto;
     overscroll-behavior: contain;
-    border-right: 1px solid var(--world-line);
-    border-left: 1px solid var(--world-line);
 }
 
 /* Carries the *scaled* footprint, since a transform does not affect layout. */
@@ -507,7 +623,8 @@ button.primary {
 
 .elevator {
     background-color: var(--elevator-bg);
-    border: 2px solid var(--elevator-border);
+    border: 1px solid var(--elevator-border);
+    border-radius: 3px;
     height: 46px;
     z-index: 1;
 }
@@ -538,9 +655,10 @@ button.primary {
     display: inline-block;
     position: absolute;
     width: 100%;
-    font-size: 15px;
+    font-family: var(--mono);
+    font-size: 14px;
     text-align: center;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--elevator-ink);
 }
 
 .elevator .buttonindicator {
@@ -549,9 +667,10 @@ button.primary {
     top: 15px;
     width: 95%;
     text-align: center;
+    font-family: var(--mono);
     font-size: 8px;
     line-height: 8px;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--elevator-ink);
 }
 
 .elevator .buttonpress {
@@ -601,9 +720,10 @@ button.primary {
 .floor .floornumber {
     position: absolute;
     color: var(--floor-number);
-    font-size: 32px;
+    font-family: var(--mono);
+    font-size: 26px;
     line-height: 50px;
-    padding-left: 10px;
+    padding-left: 12px;
 }
 
 /* ---------------------------------------------------------------------------
@@ -611,19 +731,16 @@ button.primary {
  * ------------------------------------------------------------------------- */
 
 .statscontainer {
-    flex: 0 0 240px;
+    flex: 0 0 250px;
     display: grid;
     grid-template-columns: 1fr;
     align-content: start;
     gap: 2px;
     padding: 16px;
-    font:
-        12px ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        Consolas,
-        monospace;
+    font-family: var(--mono);
+    font-size: 12px;
     color: var(--stats-text);
+    border-left: 1px solid var(--stats-line);
 }
 
 .stat {
@@ -631,15 +748,22 @@ button.primary {
     align-items: baseline;
     justify-content: space-between;
     gap: 8px;
-    padding-bottom: 3px;
+    padding-bottom: 4px;
     border-bottom: 1px solid var(--stats-line);
+}
+
+.stat .key {
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
 }
 
 .stat .value {
     text-align: right;
     font-variant-numeric: tabular-nums;
+    color: var(--stats-value);
 }
 
+/* Tap-to-reveal, so the explanation is not hover-only. */
 /* Tap-to-reveal, so the explanation is not hover-only. */
 .hint {
     min-height: 0;
@@ -650,8 +774,14 @@ button.primary {
     line-height: 1;
     border-radius: 50%;
     background: none;
-    border: 1px solid var(--stats-line);
+    border: 1px solid var(--stats-border);
     color: var(--stats-text);
+}
+
+.hint:hover {
+    background: none;
+    border-color: var(--stats-border);
+    color: var(--stats-value);
 }
 
 .hint:hover {
@@ -666,8 +796,9 @@ button.primary {
     max-width: 220px;
     margin-left: 8px;
     padding: 6px 8px;
-    background-color: var(--button-bg);
-    color: var(--button-text);
+    background-color: var(--surface-3);
+    color: var(--text-strong);
+    border: 1px solid var(--border);
     border-radius: var(--radius);
     font-size: 11px;
     text-align: left;
@@ -690,11 +821,24 @@ button.primary {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 8px;
     padding: 16px;
     text-align: center;
-    background-color: rgba(44, 44, 44, 0.72);
+    background-color: rgba(10, 12, 15, 0.78);
+    backdrop-filter: blur(2px);
     pointer-events: auto;
+}
+
+/* The overlay always sits on the dark shaft, so its text is light regardless
+ * of the colour scheme. */
+.feedback,
+.feedback h2,
+.feedback p {
+    color: #e9eef2;
+}
+
+.feedback .emphasis-color {
+    color: #ffffff;
 }
 
 .feedback h2 {
@@ -711,7 +855,13 @@ button.primary {
     min-height: var(--tap);
     display: inline-flex;
     align-items: center;
-    font-size: clamp(15px, 4vw, 20px);
+    gap: 6px;
+    padding: 0 14px;
+    font-size: clamp(14px, 3.6vw, 17px);
+    color: var(--accent-ink);
+    background-color: var(--accent);
+    border-radius: var(--radius);
+    text-decoration: none;
 }
 
 /* ---------------------------------------------------------------------------
@@ -722,10 +872,17 @@ button.primary {
     padding-bottom: 6px;
 }
 
-.codestatus h5 {
+.codestatus .error {
     margin: 0;
-    font-size: 14px;
-    line-height: 1.4;
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    font-family: var(--mono);
+    color: var(--text);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--error);
+    border-radius: var(--radius);
 }
 
 .code {
@@ -738,8 +895,10 @@ button.primary {
 
 .cm-editor {
     height: 320px;
+    background-color: var(--code-bg);
     border: 1px solid var(--editor-border);
-    border-radius: var(--radius);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
 }
 
 .cm-editor.cm-focused {
@@ -761,7 +920,9 @@ button.primary {
     flex: 0 0 auto;
     min-width: var(--tap);
     min-height: var(--tap);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-family: var(--mono);
+    font-size: 16px;
+    color: var(--text-strong);
 }
 
 .codeactions {
@@ -779,7 +940,8 @@ button.primary {
 #save_message {
     margin-left: auto;
     color: var(--text-muted);
-    font-size: 12px;
+    font-family: var(--mono);
+    font-size: 11px;
 }
 
 .codehint {
@@ -818,7 +980,7 @@ button.primary {
     gap: var(--gap);
     padding: 12px 16px;
     background-color: var(--page-bg);
-    border-bottom: 1px solid var(--stats-line);
+    border-bottom: 1px solid var(--border);
 }
 
 .sheet_header h2 {
@@ -850,8 +1012,12 @@ button.primary {
 }
 
 .help p,
-.help dl {
+.help dl,
+.sheet_body p,
+.sheet_body dl {
     max-width: 72ch;
+    font-size: 15px;
+    line-height: 1.6;
 }
 
 .help pre {
@@ -917,6 +1083,7 @@ dl dd {
 
 .help pre,
 .sheet_body pre {
+    border-radius: var(--radius);
     padding: 10px 12px;
     background-color: var(--code-bg);
     color: var(--code-text);
@@ -998,6 +1165,10 @@ body.fullscreen-demo .world {
         display: none;
     }
 
+    .headerlinks {
+        font-size: 11px;
+    }
+
     /* Header links are controls too - make them thumb-sized. */
     .headerlinks a,
     .headerlinks .linkbutton {
@@ -1008,7 +1179,7 @@ body.fullscreen-demo .world {
     }
 
     .challenge {
-        min-height: var(--tap);
+        min-height: 46px;
         margin: 6px 0;
     }
 
@@ -1056,6 +1227,9 @@ body.fullscreen-demo .world {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         column-gap: 16px;
         padding: 10px 12px;
+        /* Stacked under the world here, so the divider moves. */
+        border-left: none;
+        border-top: 1px solid var(--stats-line);
     }
 
     /* The editor takes the leftover height, so the symbol bar and the action
@@ -1113,7 +1287,8 @@ body.fullscreen-demo .world {
  * so reserve both. Wider than this - a phone in landscape - they fit on one. */
 @media (max-width: 599px) {
     .challenge {
-        min-height: 76px;
+        /* Label and title stack, then the controls wrap under them. */
+        min-height: 93px;
     }
 }
 
@@ -1123,7 +1298,8 @@ body.fullscreen-demo .world {
     }
 
     .headerlinks {
-        font-size: 16px;
+        gap: 14px;
+        font-size: 11px;
     }
 }
 

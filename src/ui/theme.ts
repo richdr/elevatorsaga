@@ -1,5 +1,6 @@
 /**
- * Solarized Light and Dark for CodeMirror 6.
+ * Editor themes for CodeMirror 6: Console Dark (the default) and Solarized
+ * Light (the alternate, for a light colour scheme).
  *
  * Hand-rolled rather than pulled in as a dependency: it is a colour table and
  * a dozen selectors, and having it here means the mobile work in phase 3 can
@@ -12,27 +13,30 @@ import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { tags as t } from "@lezer/highlight";
 import type { Extension } from "@codemirror/state";
 
-const base03 = "#002b36";
-const base02 = "#073642";
+/*
+ * Solarized Light, with the accents darkened.
+ *
+ * The canonical palette does not clear WCAG AA on its own #fdf6e3 background -
+ * its comment grey manages 2.3:1 and most accents sit around 3:1. These are the
+ * same hues, taken down to at least 4.5:1.
+ */
 const base01 = "#586e75";
-const base00 = "#657b83";
-const base1 = "#93a1a1";
-const base0 = "#839496";
 const base2 = "#eee8d5";
 const base3 = "#fdf6e3";
-const yellow = "#b58900";
-const orange = "#cb4b16";
-const red = "#dc322f";
-const magenta = "#d33682";
-const violet = "#6c71c4";
-const blue = "#268bd2";
-const cyan = "#2aa198";
-const green = "#859900";
+const gutterFg = "#5f6e6e";
+const yellow = "#7a5c00";
+const orange = "#9c4210";
+const red = "#b02725";
+const magenta = "#a3255f";
+const violet = "#4c50a0";
+const blue = "#1a6ea8";
+const cyan = "#1a6f6a";
+const green = "#5f7000";
 
 export const solarizedLightTheme = EditorView.theme(
     {
         "&": {
-            color: base00,
+            color: base01,
             backgroundColor: base3,
             fontSize: "14px",
         },
@@ -47,17 +51,17 @@ export const solarizedLightTheme = EditorView.theme(
         ".cm-activeLine": { backgroundColor: "#eee8d580" },
         ".cm-gutters": {
             backgroundColor: base3,
-            color: base1,
+            color: gutterFg,
             border: "none",
             borderRight: `1px solid ${base2}`,
         },
         ".cm-activeLineGutter": { backgroundColor: base2, color: base01 },
-        ".cm-foldPlaceholder": { backgroundColor: "transparent", border: "none", color: base00 },
+        ".cm-foldPlaceholder": { backgroundColor: "transparent", border: "none", color: base01 },
         ".cm-matchingBracket, .cm-nonmatchingBracket": {
             backgroundColor: base2,
-            outline: `1px solid ${base1}`,
+            outline: `1px solid ${gutterFg}`,
         },
-        ".cm-tooltip": { backgroundColor: base2, border: `1px solid ${base1}` },
+        ".cm-tooltip": { backgroundColor: base2, border: `1px solid ${gutterFg}` },
         ".cm-tooltip-autocomplete > ul > li[aria-selected]": {
             backgroundColor: base3,
             color: base01,
@@ -68,12 +72,12 @@ export const solarizedLightTheme = EditorView.theme(
 
 const solarizedLightHighlight = HighlightStyle.define([
     { tag: t.keyword, color: green },
-    { tag: [t.name, t.deleted, t.character, t.macroName], color: base00 },
+    { tag: [t.name, t.deleted, t.character, t.macroName], color: base01 },
     { tag: [t.propertyName], color: blue },
     { tag: [t.variableName], color: base01 },
     { tag: [t.function(t.variableName), t.labelName], color: blue },
     { tag: [t.color, t.constant(t.name), t.standard(t.name)], color: yellow },
-    { tag: [t.definition(t.name), t.separator], color: base00 },
+    { tag: [t.definition(t.name), t.separator], color: base01 },
     { tag: [t.className], color: yellow },
     { tag: [t.number, t.changed, t.annotation, t.modifier, t.self, t.namespace], color: magenta },
     { tag: [t.typeName], color: yellow },
@@ -81,7 +85,7 @@ const solarizedLightHighlight = HighlightStyle.define([
     { tag: [t.string, t.processingInstruction, t.inserted], color: cyan },
     { tag: [t.regexp, t.escape, t.special(t.string)], color: orange },
     { tag: t.meta, color: base01 },
-    { tag: t.comment, color: base1, fontStyle: "italic" },
+    { tag: t.comment, color: gutterFg, fontStyle: "italic" },
     { tag: t.strong, fontWeight: "bold" },
     { tag: t.emphasis, fontStyle: "italic" },
     { tag: t.link, color: violet, textDecoration: "underline" },
@@ -95,48 +99,92 @@ export const solarizedLight: Extension = [
     syntaxHighlighting(solarizedLightHighlight),
 ];
 
-export const solarizedDarkTheme = EditorView.theme(
+/* ---------------------------------------------------------------------------
+ * Console Dark - the default theme, matching the app's dark palette.
+ *
+ * Solarized Dark's cyan-tinted background clashed with the app's cooler
+ * slate, so the dark editor theme is built from the same tokens as the rest
+ * of the UI: teal for strings, lime for keywords, amber for numbers, sky for
+ * anything callable.
+ * ------------------------------------------------------------------------- */
+
+const consoleBg = "#0f1115";
+const consoleFg = "#c9d1d9";
+// 4.8:1 on the editor background; #6b7684 only managed 3.9:1.
+const consoleMuted = "#7d8894";
+const consoleSelection = "#22303a";
+const consoleActiveLine = "#161b22";
+const teal = "#2dd4bf";
+const lime = "#a3e635";
+const amber = "#fbbf24";
+const sky = "#7dd3fc";
+const rose = "#f87171";
+
+export const consoleDarkTheme = EditorView.theme(
     {
         "&": {
-            color: base0,
-            backgroundColor: base03,
+            color: consoleFg,
+            backgroundColor: consoleBg,
             fontSize: "14px",
         },
         ".cm-content": {
-            caretColor: base1,
+            caretColor: teal,
             fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
         },
-        ".cm-cursor, .cm-dropCursor": { borderLeftColor: base1 },
+        ".cm-cursor, .cm-dropCursor": { borderLeftColor: teal },
         "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {
-            backgroundColor: base02,
+            backgroundColor: consoleSelection,
         },
-        ".cm-activeLine": { backgroundColor: "#07364280" },
+        ".cm-activeLine": { backgroundColor: consoleActiveLine },
         ".cm-gutters": {
-            backgroundColor: base03,
-            color: base01,
+            backgroundColor: consoleBg,
+            color: consoleMuted,
             border: "none",
-            borderRight: `1px solid ${base02}`,
         },
-        ".cm-activeLineGutter": { backgroundColor: base02, color: base1 },
-        ".cm-foldPlaceholder": { backgroundColor: "transparent", border: "none", color: base0 },
+        ".cm-activeLineGutter": { backgroundColor: consoleActiveLine, color: consoleFg },
+        ".cm-foldPlaceholder": {
+            backgroundColor: "transparent",
+            border: "none",
+            color: consoleMuted,
+        },
         ".cm-matchingBracket, .cm-nonmatchingBracket": {
-            backgroundColor: base02,
-            outline: `1px solid ${base01}`,
+            backgroundColor: consoleSelection,
+            outline: `1px solid ${consoleMuted}`,
         },
-        ".cm-tooltip": { backgroundColor: base02, border: `1px solid ${base01}` },
+        ".cm-tooltip": {
+            backgroundColor: consoleActiveLine,
+            border: `1px solid ${consoleSelection}`,
+        },
         ".cm-tooltip-autocomplete > ul > li[aria-selected]": {
-            backgroundColor: base03,
-            color: base1,
+            backgroundColor: consoleSelection,
+            color: consoleFg,
         },
     },
     { dark: true },
 );
 
-/**
- * The same highlight rules serve both themes: Solarized's accent colours are
- * chosen to sit legibly on either background, which is the point of it.
- */
-export const solarizedDark: Extension = [
-    solarizedDarkTheme,
-    syntaxHighlighting(solarizedLightHighlight),
-];
+const consoleDarkHighlight = HighlightStyle.define([
+    { tag: t.keyword, color: lime },
+    { tag: [t.operator, t.operatorKeyword], color: lime },
+    { tag: [t.name, t.deleted, t.character, t.macroName], color: consoleFg },
+    { tag: [t.variableName], color: consoleFg },
+    { tag: [t.propertyName], color: sky },
+    { tag: [t.function(t.variableName), t.labelName], color: sky },
+    { tag: [t.definition(t.name), t.separator], color: consoleFg },
+    { tag: [t.className, t.typeName], color: amber },
+    { tag: [t.number, t.bool, t.null], color: amber },
+    { tag: [t.constant(t.name), t.standard(t.name)], color: amber },
+    { tag: [t.changed, t.annotation, t.modifier, t.self, t.namespace], color: amber },
+    { tag: [t.string, t.processingInstruction, t.inserted], color: teal },
+    { tag: [t.regexp, t.escape, t.special(t.string)], color: teal },
+    { tag: t.meta, color: consoleMuted },
+    { tag: t.comment, color: consoleMuted, fontStyle: "italic" },
+    { tag: t.strong, fontWeight: "bold" },
+    { tag: t.emphasis, fontStyle: "italic" },
+    { tag: t.link, color: sky, textDecoration: "underline" },
+    { tag: t.heading, fontWeight: "bold", color: amber },
+    { tag: t.invalid, color: rose },
+    { tag: t.strikethrough, textDecoration: "line-through" },
+]);
+
+export const consoleDark: Extension = [consoleDarkTheme, syntaxHighlighting(consoleDarkHighlight)];

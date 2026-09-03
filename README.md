@@ -28,6 +28,9 @@ Three things, in order:
 The simulation itself — the elevator, floor, user and world model, the 19 challenges and
 their fitness conditions — is upstream's design and stays behaviourally identical.
 
+Since then: the code samples and documentation have moved to modern JavaScript, and the
+interface has been redesigned around a dark-first "engineering console" look.
+
 See **[PLAN.md](PLAN.md)** for the phased plan and current progress.
 
 ## Compatibility with existing solutions
@@ -37,7 +40,8 @@ Deliberate design constraints, so that solutions written for the original still 
 - The player-facing API (`elevator.goToFloor`, the `"idle"` / `"floor_button_pressed"`
   events, `floor.level`, and so on) is unchanged.
 - **lodash `_` stays available inside player code**, even though the app itself no longer
-  depends on it — many published solutions use `_.each` and `_.max`.
+  depends on it — many published solutions use `_.each` and `_.max`. The samples and the
+  documentation are modern JavaScript and do not use it, but it is still there.
 - The `localStorage` key (`elevatorCrushCode_v5`) is unchanged, so an in-progress solution
   from the original site is picked up as-is.
 

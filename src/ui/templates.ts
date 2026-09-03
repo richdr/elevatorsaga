@@ -53,30 +53,42 @@ export const renderFeedback = (title: string, message: string, url: string): HTM
         </div>
     `);
 
+export type RunState = "start" | "pause" | "restart";
+
 export interface ChallengeViewModel {
     num: number;
     description: string;
     timeScale: string;
-    startButtonText: string;
-    startButtonIsRestart: boolean;
+    runState: RunState;
 }
 
-export const renderChallenge = (vm: ChallengeViewModel): HTMLElement =>
-    html(`
+const RUN_STATE: Record<RunState, { icon: IconName; label: string }> = {
+    start: { icon: "play", label: "Start" },
+    pause: { icon: "pause", label: "Pause" },
+    restart: { icon: "repeat", label: "Restart" },
+};
+
+export const renderChallenge = (vm: ChallengeViewModel): HTMLElement => {
+    const run = RUN_STATE[vm.runState];
+    return html(`
         <div class="challengebar">
-            <h2 class="challengetitle">Challenge #${vm.num}: ${vm.description}</h2>
+            <div class="challengemeta">
+                <span class="challengelabel">Challenge ${String(vm.num).padStart(2, "0")}</span>
+                <h2 class="challengetitle">${vm.description}</h2>
+            </div>
             <div class="challengecontrols">
-                <button class="startstop unselectable" type="button">${
-                    vm.startButtonIsRestart ? icon("repeat") + " " : ""
-                }${escapeHtml(vm.startButtonText)}</button>
+                <button class="startstop unselectable" type="button">${icon(run.icon)}<span>${escapeHtml(
+                    run.label,
+                )}</span></button>
                 <div class="timescale">
                     <button class="iconbutton timescale_decrease unselectable" type="button" aria-label="Slow down">${icon("minusSquare")}</button>
-                    <span class="emphasis-color timescale_value">${escapeHtml(vm.timeScale)}</span>
+                    <span class="timescale_value">${escapeHtml(vm.timeScale)}</span>
                     <button class="iconbutton timescale_increase unselectable" type="button" aria-label="Speed up">${icon("plusSquare")}</button>
                 </div>
             </div>
         </div>
     `);
+};
 
 export const renderCodeStatus = (errorMessage: string | null): HTMLElement =>
     html(`

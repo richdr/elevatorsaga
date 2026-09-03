@@ -50,12 +50,7 @@ export const presentChallenge = (
         num: challengeNum,
         description: challenge.condition.description,
         timeScale: worldController.timeScale.toFixed(0) + "x",
-        startButtonText: world.challengeEnded
-            ? "Restart"
-            : worldController.isPaused
-              ? "Start"
-              : "Pause",
-        startButtonIsRestart: world.challengeEnded,
+        runState: world.challengeEnded ? "restart" : worldController.isPaused ? "start" : "pause",
     };
     parent.replaceChildren(renderChallenge(vm));
 
