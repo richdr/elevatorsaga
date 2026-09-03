@@ -314,6 +314,65 @@ adding `tabindex` to the scroller would only add a useless extra tab stop.
 Lighthouse, mobile, production build: **performance 97, accessibility 100, best practices 100,
 SEO 100, CLS 0**.
 
+### Follow-up: the building takes the editor's palette
+
+Asked for after the refresh: make the animation match the editor's colour scheme.
+
+They were two unrelated hex tables — the editor's in `theme.ts`, the world's in `style.css`.
+Now there is one source of truth, `src/ui/palette.ts`, with semantic tokens (`keyword`,
+`string`, `number`, `muted`, …) per scheme. Both CodeMirror themes are generated from it by a
+single factory, and the world's CSS derives from the same tokens:
+
+| Building element            | Syntax token                   |
+| --------------------------- | ------------------------------ |
+| Shaft background            | editor background              |
+| Floor numbers               | `number`                       |
+| Elevator car and its border | `string`                       |
+| Lit indicators and buttons  | `keyword`                      |
+| People                      | `fg`                           |
+| Waiting too long            | `number`, then `invalid`       |
+| Floor separators, bands     | `selection`, `fg` at low alpha |
+| Stats                       | `muted` and `fg`               |
+
+- [x] `palette.ts` as the single source; `theme.ts` reduced to one theme factory, halving it
+- [x] The world now **follows the colour scheme** — the previous build deliberately kept the
+      shaft dark in both, which is what made the two palettes independent. In the light scheme
+      the shaft is Solarized cream with a magenta floor number and an olive lit indicator
+- [x] Tints and damped colours use `color-mix` against `--syn-fg`, so one expression works in
+      both directions: light-on-dark and dark-on-light
+- [x] The documentation's code-sample colours now derive from the palette too, deleting the
+      third copy
+- [x] The feedback overlay and the stats panel follow the scheme, having been hardcoded for a
+      dark shaft
+
+**CSS cannot import the palette, so the mirror in `style.css` is the one duplication left.**
+`test/palette.test.ts` closes that: it parses the stylesheet, asserts every `--syn-*` token
+matches `palette.ts` in both schemes, rejects tokens the palette does not define, and asserts
+that all 19 world colours are `var(--syn-*)`-derived rather than hardcoded. Verified to fail on
+both a changed hex and a hardcoded derivation before being relied on.
+
+**Contrast was measured, not eyeballed.** A canvas-based probe resolves each token as painted
+and computes its ratio against the surface it actually sits on. First pass found four elements
+below 3:1, and the mix percentages were then solved by sweeping rather than guessed:
+
+|                   | before      | after (dark / light) |
+| ----------------- | ----------- | -------------------- |
+| Floor number      | 2.54 / 1.89 | **5.01 / 3.18**      |
+| Unlit call button | 2.11 / 1.98 | **3.32 / 3.05**      |
+| Car floor readout | 3.11 / 2.34 | **4.36 / 3.18**      |
+| Car floor buttons | 1.79 / 1.96 | **6.02 / 3.04**      |
+
+Everything in the building now clears 3:1 in both schemes. Two notes:
+
+- The unlit call buttons are _buttons_, so WCAG 1.4.11 applies to them and upstream's ~1.9:1
+  was a real failure, not merely a faint style. Lit-versus-unlit stays obvious because it is a
+  hue change as well as a brightness one.
+- A heavier teal car fill was tried to give its digits more room; it makes the border, the
+  digits and the lit buttons all worse simultaneously, so the fill stays at 30%.
+
+Lighthouse unchanged at 97 / 100 / 100 / 100, CLS 0, and axe clean across both schemes and all
+three views.
+
 ---
 
 ## Phase 4 — Nice-to-haves (only after 0–3 ship)

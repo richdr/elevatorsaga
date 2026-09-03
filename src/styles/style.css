@@ -14,7 +14,25 @@
 :root {
     color-scheme: dark light;
 
-    /* Chrome */
+    /* ----------------------------------------------------------------------
+     * Syntax palette - MIRRORED FROM src/ui/palette.ts (CONSOLE_DARK).
+     * CSS cannot import it, so palette.test.ts asserts these stay in step.
+     * Change a colour there, not here.
+     * -------------------------------------------------------------------- */
+    --syn-bg: #0f1115;
+    --syn-fg: #c9d1d9;
+    --syn-muted: #7d8894;
+    --syn-selection: #22303a;
+    --syn-active-line: #161b22;
+    --syn-keyword: #a3e635;
+    --syn-string: #2dd4bf;
+    --syn-number: #fbbf24;
+    --syn-callable: #7dd3fc;
+    --syn-type: #fbbf24;
+    --syn-special: #2dd4bf;
+    --syn-invalid: #f87171;
+
+    /* Chrome. A little lighter than the shaft, so the building sits "in" the page. */
     --page-bg: #16181d;
     --surface: #1c1f26;
     --surface-2: #22262e;
@@ -26,32 +44,10 @@
     --text-strong: #e6edf3;
     --text-muted: #8b96a2;
 
-    --accent: #2dd4bf;
-    --accent-text: #2dd4bf;
+    --accent: var(--syn-string);
+    --accent-text: var(--syn-string);
     --accent-ink: #06231f;
-    --active: #a3e635;
-    --error: #f87171;
-
-    /* The shaft stays dark in both colour schemes - it is a lift shaft. */
-    --world-bg: #0f1115;
-    --world-line: #06070a;
-    --floor-tint-a: rgba(255, 255, 255, 0.03);
-    --floor-tint-b: rgba(255, 255, 255, 0.06);
-    --floor-tint-c: rgba(255, 255, 255, 0.085);
-    --floor-number: rgba(255, 255, 255, 0.14);
-    --indicator-idle: rgba(255, 255, 255, 0.18);
-    --indicator-active: var(--active);
-    --elevator-bg: #1b5e5a;
-    --elevator-border: #2dd4bf;
-    --elevator-ink: rgba(255, 255, 255, 0.55);
-    --user-color: #eef2f4;
-
-    /* The stats sit on the dark shaft, so like the shaft itself they do not
-     * follow the colour scheme. */
-    --stats-text: #8b96a2;
-    --stats-value: #e8eef3;
-    --stats-line: rgba(255, 255, 255, 0.09);
-    --stats-border: rgba(255, 255, 255, 0.24);
+    --error: var(--syn-invalid);
 
     --button-bg: var(--surface-2);
     --button-text: var(--text);
@@ -60,18 +56,7 @@
 
     --editor-border: var(--border);
     --editor-border-focus: var(--accent);
-
     --focus-ring: var(--accent);
-
-    /* Solarized-ish, for the documentation's code samples. */
-    --code-bg: #0f1115;
-    --code-text: #c9d1d9;
-    --code-keyword: #a3e635;
-    --code-string: #2dd4bf;
-    --code-comment: #8b96a2;
-    --code-number: #fbbf24;
-    --code-name: #7dd3fc;
-    --code-literal: #fbbf24;
 
     /* Minimum touch target, per the usual 44px guidance. */
     --tap: 44px;
@@ -85,9 +70,24 @@
     --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-/* Light is the alternate scheme. The shaft does not change - only the chrome. */
+/* Light is the alternate scheme. Only the palette and the chrome change - every
+ * derived value below follows automatically. */
 @media (prefers-color-scheme: light) {
     :root {
+        /* MIRRORED FROM src/ui/palette.ts (SOLARIZED_LIGHT). */
+        --syn-bg: #fdf6e3;
+        --syn-fg: #586e75;
+        --syn-muted: #5f6e6e;
+        --syn-selection: #eee8d5;
+        --syn-active-line: #f2ecda;
+        --syn-keyword: #5f7000;
+        --syn-string: #1a6f6a;
+        --syn-number: #a3255f;
+        --syn-callable: #1a6ea8;
+        --syn-type: #7a5c00;
+        --syn-special: #9c4210;
+        --syn-invalid: #b02725;
+
         --page-bg: #f3f5f6;
         --surface: #ffffff;
         --surface-2: #e9edef;
@@ -99,22 +99,71 @@
         --text-strong: #1c2126;
         --text-muted: #5b666e;
 
-        /* Dark enough that white text on it clears 4.5:1. */
-        --accent: #0b7070;
-        --accent-text: #0b6b6b;
         --accent-ink: #ffffff;
-        --error: #b3261e;
-
-        /* Same hues as Solarized Light, darkened to clear 4.5:1 on #fdf6e3. */
-        --code-bg: #fdf6e3;
-        --code-text: #586e75;
-        --code-keyword: #5f7000;
-        --code-string: #1a6f6a;
-        --code-comment: #5f6e6e;
-        --code-number: #a3255f;
-        --code-name: #1a6ea8;
-        --code-literal: #7a5c00;
     }
+}
+
+/* ---------------------------------------------------------------------------
+ * The building, coloured by the syntax palette.
+ *
+ * Floor numbers take the `number` colour, the car takes `string`, lit
+ * indicators take `keyword` - the same tokens that colour the code controlling
+ * them. Tints mix against the foreground, so one expression works in both
+ * schemes: light-on-dark, dark-on-light.
+ * ------------------------------------------------------------------------- */
+
+:root {
+    --world-bg: var(--syn-bg);
+    --world-line: var(--syn-selection);
+
+    --floor-tint-a: color-mix(in srgb, var(--syn-fg) 4%, transparent);
+    --floor-tint-b: color-mix(in srgb, var(--syn-fg) 7%, transparent);
+    --floor-tint-c: color-mix(in srgb, var(--syn-fg) 10%, transparent);
+
+    /* Damped against the background so the floor numbers do not shout louder
+     * than the people moving between them - but only as far as 3:1, since they
+     * are information and not decoration. Upstream's watermark was ~1.5:1.
+     * The percentages here are the higher of the two schemes' requirements. */
+    --floor-number: color-mix(in srgb, var(--syn-number) 68%, var(--syn-bg));
+
+    /* Unlit call buttons. Faint, but they are still buttons you can click, so
+     * WCAG 1.4.11 applies and they have to clear 3:1 - upstream's were 1.9:1.
+     * Lit-vs-unlit stays obvious via hue as well as brightness. */
+    --indicator-idle: color-mix(in srgb, var(--syn-muted) 80%, var(--syn-bg));
+    --indicator-active: var(--syn-keyword);
+
+    --elevator-bg: color-mix(in srgb, var(--syn-string) 30%, var(--syn-bg));
+    --elevator-border: var(--syn-string);
+    /* The car's current-floor readout. */
+    --elevator-ink: color-mix(in srgb, var(--syn-number) 85%, var(--syn-bg));
+    /* The car's unlit floor buttons. Mixed against the car rather than the
+     * shaft, so the foreground's contrast with the background carries over and
+     * the digits stay legible on the teal in both schemes. Solarized's
+     * foreground is only a mid-slate, so the light scheme needs nearly all of
+     * it - hence 96% rather than something more obviously "faint".
+     * A heavier car fill was tried and makes the border, the digits and the lit
+     * buttons all worse at once; 30% is the best available compromise. */
+    --elevator-button: color-mix(in srgb, var(--syn-fg) 96%, var(--elevator-bg));
+
+    --user-color: var(--syn-fg);
+    --user-waiting: var(--syn-number);
+    --user-late: var(--syn-invalid);
+
+    /* The stats sit on the shaft, so they follow the palette, not the chrome. */
+    --stats-text: var(--syn-muted);
+    --stats-value: var(--syn-fg);
+    --stats-line: var(--syn-selection);
+    --stats-border: color-mix(in srgb, var(--syn-muted) 60%, var(--syn-bg));
+
+    /* The documentation's code samples, from the same tokens as the editor. */
+    --code-bg: var(--syn-bg);
+    --code-text: var(--syn-fg);
+    --code-keyword: var(--syn-keyword);
+    --code-string: var(--syn-string);
+    --code-comment: var(--syn-muted);
+    --code-number: var(--syn-number);
+    --code-name: var(--syn-callable);
+    --code-literal: var(--syn-type);
 }
 
 /* ---------------------------------------------------------------------------
@@ -170,9 +219,9 @@ a:hover {
     text-decoration: underline;
 }
 
-/* Numbers and key values in prose. Bright on the shaft, the accent elsewhere. */
+/* Numbers and key values in prose. */
 .emphasis-color {
-    color: var(--emphasis, var(--text-strong));
+    color: var(--text-strong);
     font-weight: 600;
 }
 
@@ -604,21 +653,24 @@ button.primary:hover {
 
 .user {
     color: var(--user-color);
-    text-shadow: 0 1px 3px black;
+    /* A soft halo against the floor bands, in the background's own colour so it
+     * reads as depth rather than as a drop shadow. */
+    text-shadow: 0 1px 3px var(--syn-bg);
     z-index: 2;
     font-size: 14px;
 }
 
+/* Waiting a while, then waiting too long - `number`, then `invalid`. */
 .user.frustrated {
-    color: yellow;
+    color: var(--user-waiting);
 }
 
 .user.disappointed {
-    color: red;
+    color: var(--user-late);
 }
 
 .user.leaving {
-    color: #eee;
+    color: var(--syn-muted);
 }
 
 .elevator {
@@ -670,7 +722,7 @@ button.primary:hover {
     font-family: var(--mono);
     font-size: 8px;
     line-height: 8px;
-    color: var(--elevator-ink);
+    color: var(--elevator-button);
 }
 
 .elevator .buttonpress {
@@ -824,21 +876,20 @@ button.primary:hover {
     gap: 8px;
     padding: 16px;
     text-align: center;
-    background-color: rgba(10, 12, 15, 0.78);
+    /* Scrim in the shaft's own colour, so the overlay works in both schemes. */
+    background-color: color-mix(in srgb, var(--syn-bg) 82%, transparent);
     backdrop-filter: blur(2px);
     pointer-events: auto;
 }
 
-/* The overlay always sits on the dark shaft, so its text is light regardless
- * of the colour scheme. */
 .feedback,
 .feedback h2,
 .feedback p {
-    color: #e9eef2;
+    color: var(--syn-fg);
 }
 
 .feedback .emphasis-color {
-    color: #ffffff;
+    color: var(--syn-keyword);
 }
 
 .feedback h2 {
