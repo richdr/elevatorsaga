@@ -142,7 +142,6 @@ export class Elevator extends Movable<ElevatorEvents> {
         const destinationDiff = this.destinationY - this.y;
         const directionSign = Math.sign(destinationDiff);
         const velocitySign = Math.sign(this.velocityY);
-        let acceleration = 0.0;
         if (destinationDiff !== 0.0) {
             if (directionSign === velocitySign) {
                 // Moving in the correct direction
@@ -166,12 +165,12 @@ export class Elevator extends Movable<ElevatorEvents> {
                     this.velocityY -= directionSign * deceleration * dt;
                 } else {
                     // Speed up, or hold max speed
-                    acceleration = Math.min(Math.abs(destinationDiff * 5), this.ACCELERATION);
+                    const acceleration = Math.min(Math.abs(destinationDiff * 5), this.ACCELERATION);
                     this.velocityY += directionSign * acceleration * dt;
                 }
             } else if (velocitySign === 0) {
                 // Standing still - should accelerate
-                acceleration = Math.min(Math.abs(destinationDiff * 5), this.ACCELERATION);
+                const acceleration = Math.min(Math.abs(destinationDiff * 5), this.ACCELERATION);
                 this.velocityY += directionSign * acceleration * dt;
             } else {
                 // Moving the wrong way - decelerate as hard as possible

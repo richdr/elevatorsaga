@@ -164,10 +164,7 @@ export class World extends Observable<WorldEvents> {
         this.trigger("new_user", user);
         user.on("exited_elevator", () => {
             this.transportedCounter++;
-            this.maxWaitTime = Math.max(
-                this.maxWaitTime,
-                this.elapsedTime - user.spawnTimestamp,
-            );
+            this.maxWaitTime = Math.max(this.maxWaitTime, this.elapsedTime - user.spawnTimestamp);
             this.avgWaitTime =
                 (this.avgWaitTime * (this.transportedCounter - 1) +
                     (this.elapsedTime - user.spawnTimestamp)) /
@@ -195,11 +192,7 @@ export class World extends Observable<WorldEvents> {
 
     private handleButtonRepressing(eventName: string, floor: Floor): void {
         // Randomize the iteration order, or we tend to fill up the first elevator
-        for (
-            let i = 0, len = this.elevators.length, offset = randomInt(len - 1);
-            i < len;
-            ++i
-        ) {
+        for (let i = 0, len = this.elevators.length, offset = randomInt(len - 1); i < len; ++i) {
             const elevIndex = (i + offset) % len;
             const elevator = this.elevators[elevIndex];
             if (

@@ -1,5 +1,6 @@
 Elevator Saga (richdr fork)
 ===========================
+
 The elevator programming game — a mobile-friendly, modernized fork.
 
 This is a fork of [magwo/elevatorsaga](https://github.com/magwo/elevatorsaga) by
@@ -17,8 +18,8 @@ domain — this fork is published on GitHub Pages instead.
 Three things, in order:
 
 1. **A modern frontend stack** — Vite, TypeScript and ES modules in place of a dozen
-   `<script>` tags, jQuery, lodash and an unmaintained CodeMirror 5.
-2. **A mobile-friendly UI** — the original has no viewport meta tag and no media queries,
+   `<script>` tags, jQuery, lodash and an unmaintained CodeMirror 5. _Done._
+2. **A mobile-friendly UI** _(next)_ — the original has no viewport meta tag and no media queries,
    so it is effectively unusable on a phone. The centrepiece is a toggle between the
    **code editor** and the **elevator shaft** view, since the two cannot usefully share
    a phone screen.
@@ -42,8 +43,19 @@ Deliberate design constraints, so that solutions written for the original still 
 
 ## Development
 
-Currently a static site with no build step — open `index.html` in a browser, and
-`test/index.html` to run the Jasmine tests. This changes in phase 1 of the plan.
+Node 24 (see `.nvmrc`).
+
+```sh
+npm install
+npm run dev          # dev server with hot reload
+npm test             # Vitest
+npm run build        # production build into dist/
+npm run lint         # ESLint
+npm run typecheck    # tsc --noEmit
+```
+
+The simulation lives in `src/game/` and has no DOM dependencies, so it runs under
+Vitest in plain Node. The UI layer is in `src/ui/`.
 
 ## Licence
 

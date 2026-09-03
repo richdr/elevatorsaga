@@ -4,8 +4,7 @@ export const linearInterpolate = (value0: number, value1: number, x: number): nu
     value0 + (value1 - value0) * x;
 
 export const powInterpolate = (value0: number, value1: number, x: number, a: number): number =>
-    value0 +
-    ((value1 - value0) * Math.pow(x, a)) / (Math.pow(x, a) + Math.pow(1 - x, a));
+    value0 + ((value1 - value0) * Math.pow(x, a)) / (Math.pow(x, a) + Math.pow(1 - x, a));
 
 export const coolInterpolate = (value0: number, value1: number, x: number): number =>
     powInterpolate(value0, value1, x, 1.3);

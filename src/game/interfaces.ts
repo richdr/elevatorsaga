@@ -31,7 +31,11 @@ export class ElevatorInterface extends Observable<ElevatorInterfaceEvents> {
     private readonly floorCount: number;
     private readonly errorHandler: UserCodeErrorHandler;
 
-    constructor(elevator: Elevator, floorCount: number, errorHandler: UserCodeErrorHandler = rethrow) {
+    constructor(
+        elevator: Elevator,
+        floorCount: number,
+        errorHandler: UserCodeErrorHandler = rethrow,
+    ) {
         super();
         this.elevator = elevator;
         this.floorCount = floorCount;
@@ -45,10 +49,7 @@ export class ElevatorInterface extends Observable<ElevatorInterfaceEvents> {
         );
 
         elevator.on("stopped", (position) => {
-            if (
-                this.destinationQueue.length &&
-                epsilonEquals(this.destinationQueue[0], position)
-            ) {
+            if (this.destinationQueue.length && epsilonEquals(this.destinationQueue[0], position)) {
                 // Reached the destination, so remove the element at the front of the queue
                 this.destinationQueue = this.destinationQueue.slice(1);
                 if (elevator.isOnAFloor()) {

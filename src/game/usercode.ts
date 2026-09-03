@@ -19,8 +19,9 @@ export const getCodeObjFromCode = (code: string): UserCodeObject => {
     const trimmed = code.trim();
     const source = trimmed.startsWith("{") && trimmed.endsWith("}") ? "(" + code + ")" : code;
 
-    const indirectEval = eval;
-    const obj = indirectEval(source) as UserCodeObject;
+    // `globalThis.eval` rather than a bare `eval`, so this is an *indirect* eval:
+    // player code is evaluated in global scope, where `_` lives.
+    const obj = globalThis.eval(source) as UserCodeObject;
 
     if (typeof obj?.init !== "function") {
         throw "Code must contain an init function";

@@ -62,7 +62,9 @@ const compat = (): Lodash3 => {
 };
 
 /** Installs `_` as a global so evaluated player code can use it. */
-export const installUserCodeGlobals = (scope: Record<string, unknown> = globalThis as any): void => {
+export const installUserCodeGlobals = (
+    scope: Record<string, unknown> = globalThis as any,
+): void => {
     if (!scope._) {
         scope._ = compat();
     }

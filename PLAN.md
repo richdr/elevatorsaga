@@ -9,16 +9,16 @@ Working plan for the `richdr` fork of [magwo/elevatorsaga](https://github.com/ma
 
 ## Baseline (as cloned, upstream `master` @ `e0c55bf`, v1.6.5)
 
-| Aspect | Current state |
-| --- | --- |
-| Build | None. `index.html` loads 12 `<script>` tags in dependency order; globals everywhere. |
+| Aspect          | Current state                                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Build           | None. `index.html` loads 12 `<script>` tags in dependency order; globals everywhere.                                |
 | Deps (vendored) | jQuery 2.1.1, lodash (old), riot.js (only for `riot.observable`), CodeMirror 5, Font Awesome 4.1, `unobservable.js` |
-| Language | ES5 (`var`, `function`), no modules, no types |
-| Rendering | DOM elements positioned with `transform: translate(...)`, fixed pixel geometry |
-| Tests | Jasmine 2.x in a browser page (`test/index.html`) |
-| Deploy | `autopublish.sh` — merges `master` into a `gh-pages` branch by hand |
-| Mobile | **No `<meta viewport>` at all.** No media queries. Fixed-px world, hover-dependent affordances. |
-| Other | Dead Google Analytics UA property (`UA-56810935-1`) |
+| Language        | ES5 (`var`, `function`), no modules, no types                                                                       |
+| Rendering       | DOM elements positioned with `transform: translate(...)`, fixed pixel geometry                                      |
+| Tests           | Jasmine 2.x in a browser page (`test/index.html`)                                                                   |
+| Deploy          | `autopublish.sh` — merges `master` into a `gh-pages` branch by hand                                                 |
+| Mobile          | **No `<meta viewport>` at all.** No media queries. Fixed-px world, hover-dependent affordances.                     |
+| Other           | Dead Google Analytics UA property (`UA-56810935-1`)                                                                 |
 
 Engine (`movable.js`, `elevator.js`, `floor.js`, `user.js`, `world.js`, `challenges.js`, `fitness.js`)
 is genuinely framework-agnostic — the only couplings are `riot.observable` for events and lodash.
@@ -53,42 +53,43 @@ the other three are abandoned upstream experiments. Deleting them is a one-liner
 
 ---
 
-## Phase 1 — Modernize the frontend stack
+## Phase 1 — Modernize the frontend stack — ✅ COMPLETE
 
 Goal: a real build, real modules, types on the simulation, and an editor that works
-on a touchscreen. Do this *before* the UI work so the mobile work is done once, in
+on a touchscreen. Do this _before_ the UI work so the mobile work is done once, in
 the final architecture, rather than twice.
 
 ### Recommended target stack
 
-| Concern | Choice | Why |
-| --- | --- | --- |
-| Bundler / dev server | **Vite** | Zero-config for this shape of app, instant HMR, correct `base` handling for GH Pages subpaths |
-| Language | **TypeScript** (strict), ESM | The simulation has real domain types (`Elevator`, `Floor`, `User`, `World`) and the *player-facing API* becoming typed is a genuine feature |
-| UI layer | **No framework** — plain TS modules + the existing DOM/`transform` renderer | The whole UI is three panels and a stats strip. React/etc. would be more ceremony than the app has. Reassess only if the UI grows. |
-| Events | Small typed `EventEmitter` (~30 lines) | Drops `riot.js`, gives autocomplete on `elevator.on("idle", …)` |
-| lodash | **Remove** — native `map`/`filter`/`reduce`, keep a tiny local `debounce`/`limitNumber` | Only ~10 lodash functions are used. But: the *player's* code samples use `_.max`, `_.each` — see risk below. |
-| jQuery | **Remove** — `querySelector`, `classList`, `addEventListener` | Used only for DOM plumbing in `presenters.js` / `app.js` |
-| Code editor | **CodeMirror 6** (`@codemirror/{state,view,lang-javascript}`) | CM5 is unmaintained and its mobile input handling is poor; CM6 is built for touch + IME. Not Monaco — Monaco is effectively unusable on phones. |
-| Icons | Inline SVG sprite (subset of the ~8 icons used) | Kills the 400KB Font Awesome 4 directory |
-| Fonts | Self-host Oswald via `@fontsource/oswald` | Removes the `fonts.googleapis.com` request |
-| Styling | Plain CSS with custom properties + `@layer` | No preprocessor needed; enables a light/dark theme and consistent spacing tokens |
-| Tests | **Vitest** (node env) | Same assertions, no browser page; the engine tests are pure logic. Keeps `test/tests.js` largely intact. |
-| Lint/format | ESLint (flat config) + Prettier | |
-| CI | GitHub Actions: typecheck + test on PR | |
+| Concern              | Choice                                                                                  | Why                                                                                                                                             |
+| -------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bundler / dev server | **Vite**                                                                                | Zero-config for this shape of app, instant HMR, correct `base` handling for GH Pages subpaths                                                   |
+| Language             | **TypeScript** (strict), ESM                                                            | The simulation has real domain types (`Elevator`, `Floor`, `User`, `World`) and the _player-facing API_ becoming typed is a genuine feature     |
+| UI layer             | **No framework** — plain TS modules + the existing DOM/`transform` renderer             | The whole UI is three panels and a stats strip. React/etc. would be more ceremony than the app has. Reassess only if the UI grows.              |
+| Events               | Small typed `EventEmitter` (~30 lines)                                                  | Drops `riot.js`, gives autocomplete on `elevator.on("idle", …)`                                                                                 |
+| lodash               | **Remove** — native `map`/`filter`/`reduce`, keep a tiny local `debounce`/`limitNumber` | Only ~10 lodash functions are used. But: the _player's_ code samples use `_.max`, `_.each` — see risk below.                                    |
+| jQuery               | **Remove** — `querySelector`, `classList`, `addEventListener`                           | Used only for DOM plumbing in `presenters.js` / `app.js`                                                                                        |
+| Code editor          | **CodeMirror 6** (`@codemirror/{state,view,lang-javascript}`)                           | CM5 is unmaintained and its mobile input handling is poor; CM6 is built for touch + IME. Not Monaco — Monaco is effectively unusable on phones. |
+| Icons                | Inline SVG sprite (subset of the ~8 icons used)                                         | Kills the 400KB Font Awesome 4 directory                                                                                                        |
+| Fonts                | Self-host Oswald via `@fontsource/oswald`                                               | Removes the `fonts.googleapis.com` request                                                                                                      |
+| Styling              | Plain CSS with custom properties + `@layer`                                             | No preprocessor needed; enables a light/dark theme and consistent spacing tokens                                                                |
+| Tests                | **Vitest** (node env)                                                                   | Same assertions, no browser page; the engine tests are pure logic. Keeps `test/tests.js` largely intact.                                        |
+| Lint/format          | ESLint (flat config) + Prettier                                                         |                                                                                                                                                 |
+| CI                   | GitHub Actions: typecheck + test on PR                                                  |                                                                                                                                                 |
 
 ### Steps
 
-- [ ] Scaffold `package.json`, `vite.config.ts`, `tsconfig.json`; move source to `src/`
-- [ ] Convert engine files to ESM one at a time, `.js` → `.ts`, in dependency order:
+- [x] Scaffold `package.json`, `vite.config.ts`, `tsconfig.json`; move source to `src/`
+- [x] Convert engine files to ESM one at a time, `.js` → `.ts`, in dependency order:
       `base` → `movable` → `floor` → `user` → `elevator` → `interfaces` → `world` → `challenges` → `fitness`
-- [ ] Replace `riot.observable` with the typed emitter; delete `libs/riot.js`, `libs/unobservable.js`
-- [ ] Port `test/tests.js` to Vitest; **green tests are the gate for every conversion step**
-- [ ] Convert `presenters.ts` / `app.ts`, dropping jQuery
-- [ ] Swap CodeMirror 5 → CodeMirror 6 (editor, autosave to `localStorage`, error markers)
-- [ ] Extract the HTML `<script type="text/template">` blocks into typed render functions
-- [ ] Move `documentation.html` content into the app (needed anyway for Phase 3's in-app help)
-- [ ] Delete `libs/`, `font-awesome-4.1-1.0/`
+- [x] Replace `riot.observable` with the typed emitter; delete `libs/riot.js`, `libs/unobservable.js`
+- [x] Port `test/tests.js` to Vitest; **green tests are the gate for every conversion step**
+- [x] Convert `presenters.ts` / `app.ts`, dropping jQuery
+- [x] Swap CodeMirror 5 → CodeMirror 6 (editor, autosave to `localStorage`, error markers)
+- [x] Extract the HTML `<script type="text/template">` blocks into typed render functions
+- [-] Move `documentation.html` content into the app — **deferred to phase 3**, where it becomes a
+  sheet rather than a page. For now it is a second Vite entry point and builds correctly.
+- [x] Delete `libs/`, `font-awesome-4.1-1.0/`
 
 ### Risks / decisions to make
 
@@ -108,6 +109,24 @@ the final architecture, rather than twice.
 **Exit criteria:** `npm run dev` serves the game, `npm run test` green, `npm run build`
 produces a working static `dist/`, gameplay identical to upstream (all 19 challenges beatable
 with the wiki solutions).
+
+**Outcome:** met. 63 tests green (48 ported from the Jasmine suite, 15 new, covering the
+emitter and the lodash shim), lint and typecheck clean, and CI runs all five gates on PRs.
+
+Verified in a real browser against both the dev server and the built `dist/`:
+
+| Check                                                      | Result                                                                            |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Challenge 1 renders and runs                               | 3 floors, 1 elevator, users spawn, transported counter advances                   |
+| Icons                                                      | 10 inline SVGs extracted from the FA4 webfont, no icon font                       |
+| Editor                                                     | CodeMirror 6, solarized light, loads saved code from `elevatorCrushCode_v5`       |
+| Controls                                                   | start/pause, time scale, floor buttons, elevator buttons all wired                |
+| `#devtest` solution (uses `_.max(list, fn)`, `_.contains`) | ran challenge 5 to 98 transported, no errors — the lodash 3 shim works end to end |
+| Console errors                                             | none, on either page                                                              |
+
+Bundle: 528 KB raw / 181 KB gzipped, almost all of it CodeMirror 6 plus the full lodash kept
+for player compatibility. That replaces jQuery, lodash 3, riot, CodeMirror 5 and a 400 KB
+icon font.
 
 ---
 
@@ -197,5 +216,5 @@ Phase 2 between them so Phase 3 can be validated on real devices.
 2. **Repo name** — ✅ **keep `elevatorsaga`.** Lineage stays obvious; the README differentiates.
 3. **Scope of the fork** — ⏳ **TBD.** Personal playground vs. maintained community successor.
    Not blocking phases 1–3; revisit before investing in upstream-syncability, contribution docs
-   or issue templates. Until decided, default to *keeping the engine's behaviour identical to
-   upstream* so the option stays open.
+   or issue templates. Until decided, default to _keeping the engine's behaviour identical to
+   upstream_ so the option stays open.

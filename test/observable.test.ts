@@ -55,7 +55,7 @@ describe("Observable", () => {
         expect(handler.mock.calls.length).toBe(1);
     });
 
-    it("drops every subscription on off(\"*\")", () => {
+    it('drops every subscription on off("*")', () => {
         const o = new Observable();
         const handler = vi.fn((..._args: any[]) => {});
         o.on("a", handler);
