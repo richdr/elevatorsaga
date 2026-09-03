@@ -1,0 +1,510 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Movable } from "../src/game/movable";
+import { User } from "../src/game/user";
+import { Elevator } from "../src/game/elevator";
+import { ElevatorInterface } from "../src/game/interfaces";
+import { createWorldController, type SimulationWorld } from "../src/game/world";
+import { createFrameRequester } from "../src/game/util";
+import { getCodeObjFromCode } from "../src/game/usercode";
+import { Observable } from "../src/game/observable";
+import {
+    requireUserCountWithMaxWaitTime,
+    requireUserCountWithinMoves,
+    requireUserCountWithinTime,
+    requireUserCountWithinTimeWithMaxWaitTime,
+} from "../src/game/challenges";
+import type { World } from "../src/game/world";
+
+const timeForwarder = (dt: number, stepSize: number, fn: (dt: number) => void): void => {
+    let accumulated = 0.0;
+    while (accumulated < dt) {
+        accumulated += stepSize;
+        fn(stepSize);
+    }
+};
+
+const range = (start: number, end: number, step = 1): number[] => {
+    const result: number[] = [];
+    for (let i = start; i < end; i += step) {
+        result.push(i);
+    }
+    return result;
+};
+
+describe("Elevator Saga", () => {
+    let someHandler: ReturnType<typeof makeHandler>;
+    const makeHandler = () => vi.fn((..._args: any[]) => {});
+
+    beforeEach(() => {
+        someHandler = makeHandler();
+    });
+
+    describe("Movable class", () => {
+        let m: Movable;
+        beforeEach(() => {
+            m = new Movable();
+        });
+
+        it("disallows incorrect creation", () => {
+            // @ts-expect-error - calling a class without `new` is the thing under test
+            expect(() => Movable()).toThrow();
+        });
+
+        it("updates display position when told to", () => {
+            m.moveTo(1.0, 1.0);
+            m.updateDisplayPosition();
+            expect(m.worldX).toBe(1.0);
+            expect(m.worldY).toBe(1.0);
+        });
+    });
+
+    describe("User class", () => {
+        it("updates display position when told to", () => {
+            const u = new User(70);
+            u.moveTo(1.0, 1.0);
+            u.updateDisplayPosition();
+            expect(u.worldX).toBe(1.0);
+            expect(u.worldY).toBe(1.0);
+        });
+    });
+
+    describe("Movable object", () => {
+        let m: Movable;
+        beforeEach(() => {
+            m = new Movable();
+        });
+
+        it("updates display position when told to", () => {
+            m.moveTo(1.0, 1.0);
+            m.updateDisplayPosition();
+            expect(m.worldX).toBe(1.0);
+            expect(m.worldY).toBe(1.0);
+        });
+        it("does not update display position when moved", () => {
+            m.moveTo(1.0, 1.0);
+            expect(m.worldX).toBe(0.0);
+            expect(m.worldY).toBe(0.0);
+        });
+        it("triggers event when moved", () => {
+            m.on("new_state", someHandler);
+            m.moveTo(1.0, 1.0);
+            expect(someHandler).toHaveBeenCalled();
+        });
+        it("retains x pos when moveTo x is null", () => {
+            m.moveTo(1.0, 1.0);
+            m.moveTo(null, 2.0);
+            expect(m.x).toBe(1.0);
+        });
+        it("retains y pos when moveTo y is null", () => {
+            m.moveTo(1.0, 1.0);
+            m.moveTo(2.0, null);
+            expect(m.y).toBe(1.0);
+        });
+        it("gets new display position when parent is moved", () => {
+            const mParent = new Movable();
+            m.setParent(mParent);
+            mParent.moveTo(2.0, 3.0);
+            m.updateDisplayPosition();
+            expect(m.x).toBe(0.0);
+            expect(m.y).toBe(0.0);
+            expect(m.worldX).toBe(2.0);
+            expect(m.worldY).toBe(3.0);
+        });
+        it("moves to destination over time", () => {
+            // Note: the original passes the handler in the interpolator slot, and asserts
+            // only that it gets called. Preserved as-is.
+            m.moveToOverTime(2.0, 3.0, 10.0, someHandler as never);
+            timeForwarder(10.0, 0.1, (dt) => m.update(dt));
+            expect(m.x).toBe(2.0);
+            expect(m.y).toBe(3.0);
+            expect(someHandler).toHaveBeenCalled();
+        });
+    });
+
+    describe("World controller", () => {
+        const DT_MAX = 1000.0 / 59;
+        let controller: ReturnType<typeof createWorldController>;
+        let fakeWorld: SimulationWorld & Observable;
+        let fakeCodeObj: { init: () => void; update: () => void };
+        let frameRequester: ReturnType<typeof createFrameRequester>;
+
+        beforeEach(() => {
+            controller = createWorldController(DT_MAX);
+            const world = new Observable() as Observable & SimulationWorld;
+            world.challengeEnded = false;
+            world.update = vi.fn((..._args: any[]) => {});
+            world.init = () => {};
+            world.updateDisplayPositions = () => {};
+            fakeWorld = world;
+            fakeCodeObj = { init: () => {}, update: () => {} };
+            frameRequester = createFrameRequester(10.0);
+        });
+
+        it("does not update world on first animation frame", () => {
+            controller.start(fakeWorld, fakeCodeObj, frameRequester.register, true);
+            frameRequester.trigger();
+            expect(fakeWorld.update).not.toHaveBeenCalled();
+        });
+        it("calls world update with correct delta t", () => {
+            controller.start(fakeWorld, fakeCodeObj, frameRequester.register, true);
+            frameRequester.trigger();
+            frameRequester.trigger();
+            expect(fakeWorld.update).toHaveBeenCalledWith(0.01);
+        });
+        it("calls world update with scaled delta t", () => {
+            controller.timeScale = 2.0;
+            controller.start(fakeWorld, fakeCodeObj, frameRequester.register, true);
+            frameRequester.trigger();
+            frameRequester.trigger();
+            expect(fakeWorld.update).toHaveBeenCalledWith(0.02);
+        });
+        it("does not update world when paused", () => {
+            controller.start(fakeWorld, fakeCodeObj, frameRequester.register, true);
+            controller.isPaused = true;
+            frameRequester.trigger();
+            frameRequester.trigger();
+            expect(fakeWorld.update).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("Challenge requirements", () => {
+        let fakeWorld: World;
+        beforeEach(() => {
+            fakeWorld = {
+                elapsedTime: 0.0,
+                transportedCounter: 0,
+                maxWaitTime: 0.0,
+                moveCount: 0,
+            } as World;
+        });
+
+        it("requireUserCountWithinTime evaluates correctly", () => {
+            const req = requireUserCountWithinTime(10, 5.0);
+            expect(req.evaluate(fakeWorld)).toBe(null);
+            fakeWorld.elapsedTime = 5.1;
+            expect(req.evaluate(fakeWorld)).toBe(false);
+            fakeWorld.transportedCounter = 11;
+            expect(req.evaluate(fakeWorld)).toBe(false);
+            fakeWorld.elapsedTime = 4.9;
+            expect(req.evaluate(fakeWorld)).toBe(true);
+        });
+
+        it("requireUserCountWithMaxWaitTime evaluates correctly", () => {
+            const req = requireUserCountWithMaxWaitTime(10, 4.0);
+            expect(req.evaluate(fakeWorld)).toBe(null);
+            fakeWorld.maxWaitTime = 4.5;
+            expect(req.evaluate(fakeWorld)).toBe(false);
+            fakeWorld.transportedCounter = 11;
+            expect(req.evaluate(fakeWorld)).toBe(false);
+            fakeWorld.maxWaitTime = 3.9;
+            expect(req.evaluate(fakeWorld)).toBe(true);
+        });
+
+        it("requireUserCountWithinMoves evaluates correctly", () => {
+            const req = requireUserCountWithinMoves(10, 20);
+            expect(req.evaluate(fakeWorld)).toBe(null);
+            fakeWorld.moveCount = 21;
+            expect(req.evaluate(fakeWorld)).toBe(false);
+            fakeWorld.transportedCounter = 11;
+            expect(req.evaluate(fakeWorld)).toBe(false);
+            fakeWorld.moveCount = 20;
+            expect(req.evaluate(fakeWorld)).toBe(true);
+        });
+
+        it("requireUserCountWithinTimeWithMaxWaitTime evaluates correctly", () => {
+            const req = requireUserCountWithinTimeWithMaxWaitTime(10, 5.0, 4.0);
+            expect(req.evaluate(fakeWorld)).toBe(null);
+            fakeWorld.elapsedTime = 5.1;
+            expect(req.evaluate(fakeWorld)).toBe(false);
+            fakeWorld.transportedCounter = 11;
+            expect(req.evaluate(fakeWorld)).toBe(false);
+            fakeWorld.elapsedTime = 4.9;
+            expect(req.evaluate(fakeWorld)).toBe(true);
+            fakeWorld.maxWaitTime = 4.1;
+            expect(req.evaluate(fakeWorld)).toBe(false);
+        });
+    });
+
+    describe("Elevator object", () => {
+        const floorCount = 4;
+        const floorHeight = 44;
+        let e: Elevator;
+        const step = (dt: number) => {
+            e.update(dt);
+            e.updateElevatorMovement(dt);
+        };
+
+        beforeEach(() => {
+            e = new Elevator(1.5, floorCount, floorHeight);
+            e.setFloorPosition(0);
+        });
+
+        it("moves to floors specified", () => {
+            for (const floor of range(0, floorCount - 1)) {
+                e.goToFloor(floor);
+                timeForwarder(10.0, 0.015, step);
+                expect(e.y).toBe(floorHeight * (floorCount - 1) - floorHeight * floor);
+                expect(e.currentFloor).toBe(floor);
+            }
+        });
+
+        it("can change direction", () => {
+            expect(e.currentFloor).toBe(0);
+            const originalY = e.y;
+            e.goToFloor(1);
+            timeForwarder(0.2, 0.015, step);
+            expect(e.y).not.toBe(originalY);
+            e.goToFloor(0);
+            timeForwarder(10.0, 0.015, step);
+            expect(e.y).toBe(originalY);
+            expect(e.currentFloor).toBe(0);
+        });
+
+        it("is correctly aware of it being on a floor", () => {
+            expect(e.isOnAFloor()).toBe(true);
+            e.y = e.y + 0.0000000000000001;
+            expect(e.isOnAFloor()).toBe(true);
+            e.y = e.y + 0.0001;
+            expect(e.isOnAFloor()).toBe(false);
+        });
+
+        it("correctly reports travel suitability", () => {
+            e.goingUpIndicator = true;
+            e.goingDownIndicator = true;
+            expect(e.isSuitableForTravelBetween(0, 1)).toBe(true);
+            expect(e.isSuitableForTravelBetween(2, 4)).toBe(true);
+            expect(e.isSuitableForTravelBetween(5, 3)).toBe(true);
+            expect(e.isSuitableForTravelBetween(2, 0)).toBe(true);
+            e.goingUpIndicator = false;
+            expect(e.isSuitableForTravelBetween(1, 10)).toBe(false);
+            e.goingDownIndicator = false;
+            expect(e.isSuitableForTravelBetween(20, 0)).toBe(false);
+        });
+
+        it("reports pressed floor buttons", () => {
+            e.pressFloorButton(2);
+            e.pressFloorButton(3);
+            expect(e.getPressedFloors()).toEqual([2, 3]);
+        });
+
+        it("reports not approaching floor 0 when going up from floor 0", () => {
+            e.goToFloor(1);
+            timeForwarder(0.01, 0.015, step);
+            expect(e.isApproachingFloor(0)).toBe(false);
+        });
+
+        it("reports approaching floor 2 when going up from floor 0", () => {
+            e.goToFloor(1);
+            timeForwarder(0.01, 0.015, step);
+            expect(e.isApproachingFloor(2)).toBe(true);
+        });
+
+        it("reports approaching floor 2 when going down from floor 3", () => {
+            e.setFloorPosition(3);
+            e.goToFloor(2);
+            timeForwarder(0.01, 0.015, step);
+            expect(e.isApproachingFloor(2)).toBe(true);
+        });
+
+        it("emits no passing floor events when going from floor 0 to 1", () => {
+            e.on("passing_floor", someHandler);
+            e.goToFloor(1);
+            timeForwarder(10.0, 0.015, step);
+            expect(e.currentFloor).toBe(1);
+            expect(someHandler).not.toHaveBeenCalled();
+        });
+
+        it("emits passing floor event when going from floor 0 to 2", () => {
+            e.on("passing_floor", someHandler);
+            e.goToFloor(2);
+            timeForwarder(10.0, 0.015, step);
+            expect(e.currentFloor).toBe(2);
+            expect(someHandler.mock.calls.length).toBe(1);
+            expect(someHandler.mock.calls[0].slice(0, 1)).toEqual([1]);
+        });
+
+        it("emits passing floor events when going from floor 0 to 3", () => {
+            e.on("passing_floor", someHandler);
+            e.goToFloor(3);
+            timeForwarder(10.0, 0.015, step);
+            expect(e.currentFloor).toBe(3);
+            expect(someHandler.mock.calls.length).toBe(2);
+            expect(someHandler.mock.calls[0].slice(0, 1)).toEqual([1]);
+            expect(someHandler.mock.calls[1].slice(0, 1)).toEqual([2]);
+        });
+
+        it("doesnt raise unexpected events when told to stop(ish) when passing floor", () => {
+            let passingFloorEventCount = 0;
+            e.on("passing_floor", (floorNum, direction) => {
+                expect(floorNum).toBe(1);
+                expect(direction).toBe("up");
+                passingFloorEventCount++;
+                e.goToFloor(e.getExactFutureFloorIfStopped());
+            });
+            e.goToFloor(2);
+            timeForwarder(3.0, 0.01401, step);
+            expect(passingFloorEventCount).toBeGreaterThan(0);
+            expect(e.getExactCurrentFloor()).toBeLessThan(1.15);
+        });
+
+        it("doesnt seem to overshoot when stopping at floors", () => {
+            for (const updatesPerSecond of range(60, 120, 2.32133)) {
+                const stepSize = 1.0 / updatesPerSecond;
+                e.setFloorPosition(1);
+                e.goToFloor(3);
+                timeForwarder(5.0, stepSize, (dt) => {
+                    step(dt);
+                    expect(e.getExactCurrentFloor()).toBeGreaterThanOrEqual(1.0);
+                    expect(e.getExactCurrentFloor()).toBeLessThanOrEqual(3.0);
+                });
+                expect(e.getExactCurrentFloor()).toEqual(3.0);
+            }
+        });
+    });
+
+    describe("API", () => {
+        describe("Elevator interface", () => {
+            let e: Elevator;
+            let elevInterface: ElevatorInterface;
+            const step = (dt: number) => {
+                e.update(dt);
+                e.updateElevatorMovement(dt);
+            };
+
+            beforeEach(() => {
+                e = new Elevator(1.5, 4, 40);
+                e.setFloorPosition(0);
+                elevInterface = new ElevatorInterface(e, 4);
+            });
+
+            describe("events", () => {
+                it("propagates stopped_at_floor event", () => {
+                    elevInterface.on("stopped_at_floor", someHandler);
+                    e.trigger("stopped_at_floor", 3);
+                    expect(someHandler.mock.lastCall?.slice(0, 1)).toEqual([3]);
+                });
+
+                it("does not propagate stopped event", () => {
+                    elevInterface.on("stopped", someHandler);
+                    e.trigger("stopped", 3.1);
+                    expect(someHandler).not.toHaveBeenCalled();
+                });
+
+                it("triggers idle event at start", () => {
+                    elevInterface.on("idle", someHandler);
+                    elevInterface.checkDestinationQueue();
+                    expect(someHandler).toHaveBeenCalled();
+                });
+
+                it("triggers idle event when queue empties", () => {
+                    elevInterface.on("idle", someHandler);
+                    elevInterface.destinationQueue = [11, 21];
+                    e.y = 11;
+                    e.trigger("stopped", e.y);
+                    expect(someHandler).not.toHaveBeenCalled();
+                    e.y = 21;
+                    e.trigger("stopped", e.y);
+                    expect(someHandler).toHaveBeenCalled();
+                });
+            });
+
+            it("stops when told told to stop", () => {
+                const originalY = e.y;
+                elevInterface.goToFloor(2);
+                timeForwarder(10, 0.015, step);
+                expect(e.y).not.toBe(originalY);
+
+                elevInterface.goToFloor(0);
+                timeForwarder(0.2, 0.015, step);
+                const whenMovingY = e.y;
+
+                elevInterface.stop();
+                timeForwarder(10, 0.015, step);
+                expect(e.y).not.toBe(whenMovingY);
+                expect(e.y).not.toBe(originalY);
+            });
+
+            describe("destination direction", () => {
+                it("reports stopped when already there", () => {
+                    e.setFloorPosition(1);
+                    elevInterface.goToFloor(1);
+                    expect(elevInterface.destinationDirection()).toBe("stopped");
+                });
+                it("reports up when going up", () => {
+                    elevInterface.goToFloor(1);
+                    expect(elevInterface.destinationDirection()).toBe("up");
+                });
+                it("reports down when going down", () => {
+                    e.setFloorPosition(3);
+                    elevInterface.goToFloor(2);
+                    expect(elevInterface.destinationDirection()).toBe("down");
+                });
+            });
+
+            it("stores going up and going down properties", () => {
+                expect(e.goingUpIndicator).toBe(true);
+                expect(e.goingDownIndicator).toBe(true);
+                expect(elevInterface.goingUpIndicator()).toBe(true);
+                expect(elevInterface.goingDownIndicator()).toBe(true);
+
+                elevInterface.goingUpIndicator(false);
+                expect(elevInterface.goingUpIndicator()).toBe(false);
+                expect(elevInterface.goingDownIndicator()).toBe(true);
+
+                elevInterface.goingDownIndicator(false);
+                expect(elevInterface.goingDownIndicator()).toBe(false);
+                expect(elevInterface.goingUpIndicator()).toBe(false);
+            });
+
+            it("can chain calls to going up and down indicator functions", () => {
+                elevInterface.goingUpIndicator(false).goingDownIndicator(false);
+                expect(elevInterface.goingUpIndicator()).toBe(false);
+                expect(elevInterface.goingDownIndicator()).toBe(false);
+            });
+
+            it("normalizes load factor", () => {
+                for (let i = 0; i < 20; i++) {
+                    e.userEntering(new User(55 + Math.floor(Math.random() * 46)));
+                }
+                const load = elevInterface.loadFactor();
+                expect(load).toBeGreaterThanOrEqual(0);
+                expect(load).toBeLessThanOrEqual(1);
+            });
+
+            it("doesnt raise unexpected events when told to stop when passing floor", () => {
+                e.setFloorPosition(2);
+                elevInterface.goToFloor(0);
+                let passingFloorEventCount = 0;
+                elevInterface.on("passing_floor", (floorNum) => {
+                    passingFloorEventCount++;
+                    // We only expect to pass floor 1, though several such events are
+                    // possible and fine, due to overshoot.
+                    expect(floorNum).toBe(1);
+                    elevInterface.stop();
+                });
+                timeForwarder(3.0, 0.01401, step);
+                expect(passingFloorEventCount).toBeGreaterThan(0);
+            });
+        });
+    });
+
+    describe("getCodeObjFromCode", () => {
+        const testCode = "{init: function init() {}, update: function update() {}}";
+
+        it("handles trailing whitespace", () => {
+            expect(getCodeObjFromCode(testCode + "\n")).toEqual(expect.any(Object));
+        });
+        it("handles prefix whitespace", () => {
+            expect(getCodeObjFromCode("\n" + testCode)).toEqual(expect.any(Object));
+        });
+        it("handles prefix and trailing whitespace", () => {
+            expect(getCodeObjFromCode("\n" + testCode + "\n")).toEqual(expect.any(Object));
+        });
+        it("rejects code without an init function", () => {
+            expect(() => getCodeObjFromCode("{update: function() {}}")).toThrow();
+        });
+        it("rejects code without an update function", () => {
+            expect(() => getCodeObjFromCode("{init: function() {}}")).toThrow();
+        });
+    });
+});
