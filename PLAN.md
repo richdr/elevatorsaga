@@ -273,7 +273,11 @@ The samples were ES5 with lodash, which is a decade out of date as a thing to te
 - [x] Tests: modern syntax (method shorthand, arrows, destructuring, spread, classes, template
       literals) parses; the original ES5-with-lodash style still parses; and **both shipped
       samples are executed against the real simulation**, so a typo in a sample string cannot
-      ship silently again
+      ship silently again.
+      _Correction:_ as first written these two tests asserted a stochastic outcome and failed
+      in CI at a measured 6% rate — the default sample drives one elevator between two floors
+      of four, so it transports a median of 3 people and sometimes none. They now stub
+      `Math.random` with a seeded generator, and 30 consecutive suite runs are clean.
 
 `_` is still installed for player code and still shimmed to lodash 3 semantics. Nothing that
 worked before stops working; we just no longer teach it.

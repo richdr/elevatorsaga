@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { getCodeObjFromCode } from "../src/game/usercode";
 import { installUserCodeGlobals } from "../src/game/lodash-global";
 import { DEFAULT_CODE, DEVTEST_CODE } from "../src/ui/default-code";
@@ -59,21 +59,48 @@ describe("player code", () => {
     /**
      * The samples are strings, so a syntax error or a wrong method name in them
      * would otherwise ship silently. These run them against the real simulation.
+     *
+     * The simulation spawns people at random, so `Math.random` is replaced with
+     * a seeded generator for the duration. Without it these assertions are a
+     * coin toss: the default sample only drives one elevator between floors 0
+     * and 1 of a four-floor building, so it transports a median of 3 people and
+     * **nobody at all in 6% of runs** - which is exactly how it failed in CI
+     * after passing locally.
      */
     describe("the shipped samples", () => {
-        it("the default sample parses and runs", () => {
+        /** mulberry32 - small, fast, and good enough to make a run repeatable. */
+        const seeded = (seed: number) => () => {
+            seed = (seed + 0x6d2b79f5) | 0;
+            let t = seed;
+            t = Math.imul(t ^ (t >>> 15), t | 1);
+            t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+
+        const realRandom = Math.random;
+        beforeEach(() => {
+            Math.random = seeded(1);
+        });
+        afterEach(() => {
+            Math.random = realRandom;
+        });
+
+        it("the default sample runs and moves people", () => {
             const codeObj = getCodeObjFromCode(DEFAULT_CODE);
             const result = calculateFitness(fitnessChallenges[0], codeObj, 1000.0 / 60.0, 4000);
             expect(result.error).toBeUndefined();
-            // Two floors served by one elevator still moves people.
-            expect(result.transportedCount).toBeGreaterThan(0);
+            // 9 with this seed. Asserted as a floor rather than an equality, so
+            // an unrelated engine tweak does not fail the build.
+            expect(result.transportedCount).toBeGreaterThanOrEqual(1);
         });
 
-        it("the devtest sample parses and transports people", () => {
+        it("the devtest sample transports people efficiently", () => {
             const codeObj = getCodeObjFromCode(DEVTEST_CODE);
             const result = calculateFitness(fitnessChallenges[1], codeObj, 1000.0 / 60.0, 4000);
             expect(result.error).toBeUndefined();
-            expect(result.transportedCount).toBeGreaterThan(10);
+            // 71 with this seed - it serves every floor, so it should be far
+            // ahead of the default sample rather than merely nonzero.
+            expect(result.transportedCount).toBeGreaterThan(20);
         });
     });
 });
