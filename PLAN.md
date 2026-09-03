@@ -162,7 +162,7 @@ Two notes:
 
 ---
 
-## Phase 3 — Mobile-friendly UI
+## Phase 3 — Mobile-friendly UI — ✅ COMPLETE (bar real-device checking)
 
 The headline feature: **a view toggle between the code editor and the elevator shaft**,
 because both cannot usefully share a phone screen.
@@ -175,31 +175,85 @@ because both cannot usefully share a phone screen.
   1. Compact sticky header: challenge number + condition, start/stop, time-scale
   2. **Segmented control: `Elevators | Code`** (the toggle)
   3. The active pane, filling remaining viewport height
-  4. Stats as a collapsible bottom sheet (peek showing transported + elapsed)
+  4. Stats in a two-column grid under the world (three columns in landscape)
+
+  The stats ended up as a plain grid rather than the planned collapsing sheet with a peek row:
+  all six fit in 80px, so hiding four of them behind a tap bought nothing and cost the player
+  information they want while watching a run.
 
 ### Steps
 
-- [ ] **Add `<meta name="viewport" content="width=device-width, initial-scale=1">`** — it's genuinely absent today, which is why the site is unusable on a phone
-- [ ] `100dvh` + `env(safe-area-inset-*)` so iOS Safari's toolbars don't clip controls
-- [ ] Build the segmented toggle; persist the choice; keyboard + `aria-selected` accessible
-- [ ] **Auto-switch to Elevators on Apply/Start**, and to Code on a code error — the toggle should mostly manage itself
-- [ ] Make the world responsive: floor height and elevator width from CSS custom properties, computed to fit the viewport instead of hardcoded px in `world.ts`/`presenters.ts`
-- [ ] Horizontal scroll/pinch for challenges with many elevators; snap to elevator columns
-- [ ] Touch targets ≥44×44px for start/stop, time-scale, Apply/Save/Reset
-- [ ] Replace hover-only affordances (e.g. the "Moves" `title` tooltip) with tap-to-reveal
-- [ ] Editor on mobile: CM6 with `EditorView.lineWrapping`, no line numbers on narrow, an
-      insert-symbol toolbar row (`{ } ( ) . ; =>`), and keyboard-avoidance so the caret
-      isn't hidden behind the on-screen keyboard
-- [ ] Floating action button for Apply while in Code view
-- [ ] Feedback/challenge-complete overlay sized for narrow screens
-- [ ] In-app help/docs as a sheet rather than a separate page (touch: no new tab)
-- [ ] Dark mode via `prefers-color-scheme` (phones, evenings)
-- [ ] `prefers-reduced-motion` for the user/elevator animations
-- [ ] Verify on real hardware: iOS Safari + Android Chrome, portrait and landscape
-- [ ] Lighthouse mobile pass (perf + a11y)
+- [x] **Add `<meta name="viewport" content="width=device-width, initial-scale=1">`** — it's genuinely absent today, which is why the site is unusable on a phone
+- [x] `100dvh` + `env(safe-area-inset-*)` so iOS Safari's toolbars don't clip controls
+- [x] Build the segmented toggle; persist the choice; keyboard + `aria-selected` accessible
+- [x] **Auto-switch to Elevators on Apply/Start**, and to Code on a code error — the toggle should mostly manage itself
+- [x] Make the world responsive — **done differently to the plan.** Rather than driving floor
+      height and elevator width from CSS custom properties, the world keeps the engine's fixed
+      pixel geometry and is scaled with a CSS transform to fit the space available. Same result
+      on screen, and not one line of gameplay maths moves. A 21-floor, 8-elevator challenge now
+      fits a 390px phone whole.
+- [~] Horizontal scroll for challenges with many elevators — the viewport scrolls in whichever
+  axis overflows once the scale floor is hit. **Snap-to-column is not done:** the elevators
+  are absolutely positioned inside a transformed container, where CSS scroll snapping does
+  not behave. Turned out to be unnecessary anyway — every challenge fits whole at the
+  widths tested.
+- [x] Touch targets ≥44×44px for start/stop, time-scale, Apply/Save/Reset
+- [x] Replace hover-only affordances (e.g. the "Moves" `title` tooltip) with tap-to-reveal
+- [x] Editor on mobile: CM6 with `EditorView.lineWrapping`, no line numbers below 600px, an
+      insert-symbol toolbar row, and keyboard-avoidance driven by `visualViewport` so the
+      layout shrinks to the space the on-screen keyboard leaves
+- [-] Floating action button for Apply — **dropped deliberately.** Built it, then removed it:
+  the code pane's action row is pinned to the bottom of the viewport and always visible, so
+  the FAB was a floating button overlapping an identical button 20px away. Apply is instead
+  the primary button in that row.
+- [x] Feedback/challenge-complete overlay sized for narrow screens
+- [x] In-app help/docs as a sheet rather than a separate page (touch: no new tab)
+- [x] Dark mode via `prefers-color-scheme` (phones, evenings)
+- [x] `prefers-reduced-motion` for the user/elevator animations
+- [ ] **Verify on real hardware: iOS Safari + Android Chrome, portrait and landscape.** Not
+      something I can do — everything below is device emulation. The live URL is the point of
+      phase 2; this is the one item left for you.
+- [x] Lighthouse mobile pass (perf + a11y)
 
 **Exit criteria:** a challenge can be read, coded, run, and watched to completion on a phone,
 one-handed, without pinch-zooming.
+
+**Outcome:** met under emulation. Checked with Playwright across iPhone 13 portrait and
+landscape, Pixel 7, and a 1400px desktop, on both the dev server and the built output:
+
+| Check                                                  | Result                                                          |
+| ------------------------------------------------------ | --------------------------------------------------------------- |
+| Page-level horizontal overflow                         | none at any size tested                                         |
+| Tap targets below 44px                                 | none                                                            |
+| Toggle, symbol bar, gutter hiding, pane switching      | correct on each side of the 900px breakpoint                    |
+| Apply from the code view                               | switches to Elevators and runs the challenge                    |
+| Challenge 19 (21 floors, 8 elevators) on a 390px phone | fits whole, scale 0.36, no scrolling                            |
+| Help sheet                                             | opens, renders the shared docs content, highlights code, closes |
+| Dark mode                                              | page and editor both switch                                     |
+| Console errors                                         | none, on either page                                            |
+
+Lighthouse, mobile emulation, against the production build:
+
+|                         | Before this phase | After     |
+| ----------------------- | ----------------- | --------- |
+| Performance             | 94                | **96**    |
+| Accessibility           | 94                | **100**   |
+| Best practices          | 96                | **100**   |
+| Cumulative layout shift | 0.083             | **0.004** |
+
+The accessibility and best-practices gaps were real bugs, not scoring trivia:
+
+- **Contrast.** Upstream's `#555` body text on the khaki background is 3.9:1, its `#333`-on-`#777`
+  buttons are 2.82:1, and the pale `--emphasis` colour — designed for the dark world panel — was
+  being used for the challenge description on the light page at **1.67:1**. Fixed with a darker
+  text colour, a light-on-grey button, and a separate emphasis colour for light surfaces.
+- **Heading order** jumped h1 → h3 → h5.
+- **A missing favicon** was logging a 404 to the console on every load.
+- **The layout shift** was the script-rendered challenge bar appearing and shoving the panes
+  down 76px. Reserving its height took CLS from 0.083 to 0.004.
+
+LCP is 2.3s on emulated slow 4G, dominated by the 181 KB gzipped bundle — CodeMirror plus the
+lodash kept for player compatibility. Worth revisiting in phase 4 if it matters.
 
 ---
 

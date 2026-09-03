@@ -81,9 +81,11 @@ export const presentFeedback = (
     parent.replaceChildren(renderFeedback(title, message, url));
 };
 
+/**
+ * Builds the world's DOM. Sizing is not set here - the world keeps the engine's
+ * fixed pixel geometry and `createWorldScaler` scales it to fit.
+ */
 export const presentWorld = (worldElem: HTMLElement, world: World): void => {
-    worldElem.style.height = world.floorHeight * world.floors.length + "px";
-
     for (const floor of world.floors) {
         const floorElem = renderFloor(floor.level, floor.yPosition);
         const up = qs(".up", floorElem);

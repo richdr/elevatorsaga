@@ -3,7 +3,7 @@
  * CM5 is unmaintained, and its handling of touch input and on-screen
  * keyboards is poor, which matters for the mobile work.
  */
-import { EditorState, type Extension } from "@codemirror/state";
+import { Compartment, EditorState, type Extension } from "@codemirror/state";
 import { EditorView, keymap, lineNumbers, highlightActiveLine } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { javascript } from "@codemirror/lang-javascript";
@@ -12,7 +12,7 @@ import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
 import { Observable } from "../game/observable";
 import { getCodeObjFromCode, type UserCodeObject } from "../game/usercode";
 import { DEFAULT_CODE, DEVTEST_CODE } from "./default-code";
-import { solarizedLight } from "./theme";
+import { solarizedDark, solarizedLight } from "./theme";
 
 /**
  * Unchanged from the original on purpose: a player who has a solution in
@@ -39,11 +39,13 @@ const debounce = (fn: () => void, wait: number): (() => void) => {
 
 export class CodeEditor extends Observable<EditorEvents> {
     private readonly view: EditorView;
+    private readonly themeCompartment = new Compartment();
 
     constructor(parent: HTMLElement, extraExtensions: Extension[] = []) {
         super();
 
         const autoSave = debounce(() => this.save(), 1000);
+        const darkMode = window.matchMedia("(prefers-color-scheme: dark)");
 
         this.view = new EditorView({
             parent,
@@ -58,7 +60,10 @@ export class CodeEditor extends Observable<EditorEvents> {
                     closeBrackets(),
                     highlightActiveLine(),
                     javascript(),
-                    solarizedLight,
+                    // Wrapping matters more than column discipline on a phone,
+                    // where there is no room to scroll sideways comfortably.
+                    EditorView.lineWrapping,
+                    this.themeCompartment.of(darkMode.matches ? solarizedDark : solarizedLight),
                     keymap.of([
                         ...closeBracketsKeymap,
                         ...defaultKeymap,
@@ -74,6 +79,25 @@ export class CodeEditor extends Observable<EditorEvents> {
                 ],
             }),
         });
+
+        darkMode.addEventListener("change", (e) => {
+            this.view.dispatch({
+                effects: this.themeCompartment.reconfigure(
+                    e.matches ? solarizedDark : solarizedLight,
+                ),
+            });
+        });
+    }
+
+    /** Inserts text at the cursor and keeps focus, for the mobile symbol bar. */
+    insertText(text: string): void {
+        const { from, to } = this.view.state.selection.main;
+        this.view.dispatch({
+            changes: { from, to, insert: text },
+            selection: { anchor: from + text.length },
+            scrollIntoView: true,
+        });
+        this.view.focus();
     }
 
     getCode(): string {

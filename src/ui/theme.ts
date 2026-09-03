@@ -1,5 +1,5 @@
 /**
- * Solarized Light for CodeMirror 6.
+ * Solarized Light and Dark for CodeMirror 6.
  *
  * Hand-rolled rather than pulled in as a dependency: it is a colour table and
  * a dozen selectors, and having it here means the mobile work in phase 3 can
@@ -13,9 +13,11 @@ import { tags as t } from "@lezer/highlight";
 import type { Extension } from "@codemirror/state";
 
 const base03 = "#002b36";
+const base02 = "#073642";
 const base01 = "#586e75";
 const base00 = "#657b83";
 const base1 = "#93a1a1";
+const base0 = "#839496";
 const base2 = "#eee8d5";
 const base3 = "#fdf6e3";
 const yellow = "#b58900";
@@ -93,4 +95,48 @@ export const solarizedLight: Extension = [
     syntaxHighlighting(solarizedLightHighlight),
 ];
 
-export const editorBaseColors = { base03, base3, base2 };
+export const solarizedDarkTheme = EditorView.theme(
+    {
+        "&": {
+            color: base0,
+            backgroundColor: base03,
+            fontSize: "14px",
+        },
+        ".cm-content": {
+            caretColor: base1,
+            fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+        },
+        ".cm-cursor, .cm-dropCursor": { borderLeftColor: base1 },
+        "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {
+            backgroundColor: base02,
+        },
+        ".cm-activeLine": { backgroundColor: "#07364280" },
+        ".cm-gutters": {
+            backgroundColor: base03,
+            color: base01,
+            border: "none",
+            borderRight: `1px solid ${base02}`,
+        },
+        ".cm-activeLineGutter": { backgroundColor: base02, color: base1 },
+        ".cm-foldPlaceholder": { backgroundColor: "transparent", border: "none", color: base0 },
+        ".cm-matchingBracket, .cm-nonmatchingBracket": {
+            backgroundColor: base02,
+            outline: `1px solid ${base01}`,
+        },
+        ".cm-tooltip": { backgroundColor: base02, border: `1px solid ${base01}` },
+        ".cm-tooltip-autocomplete > ul > li[aria-selected]": {
+            backgroundColor: base03,
+            color: base1,
+        },
+    },
+    { dark: true },
+);
+
+/**
+ * The same highlight rules serve both themes: Solarized's accent colours are
+ * chosen to sit legibly on either background, which is the point of it.
+ */
+export const solarizedDark: Extension = [
+    solarizedDarkTheme,
+    syntaxHighlighting(solarizedLightHighlight),
+];

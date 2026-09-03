@@ -64,7 +64,7 @@ export interface ChallengeViewModel {
 export const renderChallenge = (vm: ChallengeViewModel): HTMLElement =>
     html(`
         <div class="challengebar">
-            <h3 class="challengetitle">Challenge #${vm.num}: ${vm.description}</h3>
+            <h2 class="challengetitle">Challenge #${vm.num}: ${vm.description}</h2>
             <div class="challengecontrols">
                 <button class="startstop unselectable" type="button">${
                     vm.startButtonIsRestart ? icon("repeat") + " " : ""
@@ -80,7 +80,7 @@ export const renderChallenge = (vm: ChallengeViewModel): HTMLElement =>
 
 export const renderCodeStatus = (errorMessage: string | null): HTMLElement =>
     html(`
-        <h5 class="error" style="display: ${errorMessage ? "block" : "none"}">
+        <p class="error" style="display: ${errorMessage ? "block" : "none"}">
             ${icon("warning", "error-color")} There is a problem with your code: ${errorMessage ?? ""}
-        </h5>
+        </p>
     `);

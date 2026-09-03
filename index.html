@@ -2,21 +2,30 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
+        <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="color-scheme" content="light dark" />
+        <meta
+            name="description"
+            content="Elevator Saga - program the movement of elevators in JavaScript and transport people efficiently."
+        />
         <title>Elevator Saga - the elevator programming game</title>
         <script type="module" src="/src/main.ts"></script>
     </head>
-    <body>
+    <body data-view="world">
         <div class="container">
-            <div class="header">
-                <h1 class="left">
-                    Elevator Saga <em class="emphasis-color">The elevator programming game</em>
+            <header class="header">
+                <h1 class="title">
+                    Elevator Saga
+                    <em class="emphasis-color">The elevator programming game</em>
                 </h1>
-                <a class="right" href="https://github.com/magwo/elevatorsaga/wiki/"
-                    >Wiki &amp; Solutions</a
-                >
-                <a class="right" href="documentation.html#docs">Documentation</a>
-                <a class="right" href="documentation.html">Help</a>
-            </div>
+                <nav class="headerlinks">
+                    <button type="button" id="button_help" class="linkbutton">
+                        Help &amp; API
+                    </button>
+                    <a href="https://github.com/magwo/elevatorsaga/wiki/">Solutions</a>
+                </nav>
+            </header>
 
             <noscript>
                 <h2>
@@ -25,64 +34,115 @@
                 </h2>
             </noscript>
 
-            <div class="challenge" style="height: 40px"></div>
+            <div class="challenge"></div>
 
-            <div class="world">
-                <div class="feedbackcontainer"></div>
-                <div class="innerworld"></div>
-                <div class="statscontainer">
-                    <div style="top: 20px">
-                        <span class="key">Transported</span
-                        ><span class="value transportedcounter"></span>
-                    </div>
-                    <div style="top: 40px">
-                        <span class="key">Elapsed time</span><span class="value elapsedtime"></span>
-                    </div>
-                    <div style="top: 60px">
-                        <span class="key">Transported/s</span
-                        ><span class="value transportedpersec"></span>
-                    </div>
-                    <div style="top: 80px">
-                        <span class="key">Avg waiting time</span
-                        ><span class="value avgwaittime"></span>
-                    </div>
-                    <div style="top: 100px">
-                        <span class="key">Max waiting time</span
-                        ><span class="value maxwaittime"></span>
-                    </div>
-                    <div style="top: 120px">
-                        <span
-                            class="key"
-                            title="Number of floors that have been travelled by elevators"
-                            >Moves</span
-                        ><span class="value movecount"></span>
-                    </div>
-                </div>
+            <div class="viewtoggle" role="tablist" aria-label="Switch between views">
+                <button
+                    type="button"
+                    class="viewtoggle_option"
+                    role="tab"
+                    data-view="world"
+                    aria-selected="true"
+                    aria-controls="pane-world"
+                >
+                    Elevators
+                </button>
+                <button
+                    type="button"
+                    class="viewtoggle_option"
+                    role="tab"
+                    data-view="code"
+                    aria-selected="false"
+                    aria-controls="pane-code"
+                >
+                    Code
+                </button>
             </div>
 
-            <div class="codestatus"></div>
-            <div class="code" id="code"></div>
-            <button id="button_reset" style="float: left">Reset</button>
-            <button id="button_resetundo" style="float: left">Undo reset</button>
-            <button id="button_apply" style="float: right">Apply</button>
-            <button id="button_save" style="float: right">Save</button>
-            <span id="save_message" style="float: right"></span>
-            <span id="fitness_message" style="float: right"></span>
-            <div style="clear: both"></div>
+            <main class="panes">
+                <section class="pane pane-world" id="pane-world" role="tabpanel">
+                    <div class="world">
+                        <div class="worldviewport">
+                            <div class="worldsizer">
+                                <div class="worldscaler">
+                                    <div class="innerworld"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="statscontainer">
+                            <div class="stat">
+                                <span class="key">Transported</span>
+                                <span class="value transportedcounter">0</span>
+                            </div>
+                            <div class="stat">
+                                <span class="key">Elapsed</span>
+                                <span class="value elapsedtime">0s</span>
+                            </div>
+                            <div class="stat">
+                                <span class="key">Transported/s</span>
+                                <span class="value transportedpersec">0</span>
+                            </div>
+                            <div class="stat">
+                                <span class="key">Avg wait</span>
+                                <span class="value avgwaittime">0s</span>
+                            </div>
+                            <div class="stat">
+                                <span class="key">Max wait</span>
+                                <span class="value maxwaittime">0s</span>
+                            </div>
+                            <div class="stat">
+                                <span class="key">
+                                    Moves
+                                    <button
+                                        type="button"
+                                        class="hint"
+                                        aria-label="What does Moves mean?"
+                                        data-hint="Number of floors travelled by elevators"
+                                    >
+                                        ?
+                                    </button>
+                                </span>
+                                <span class="value movecount">0</span>
+                            </div>
+                        </div>
+                        <div class="feedbackcontainer"></div>
+                    </div>
+                </section>
 
-            <div style="margin-top: 20px">
-                <h3>
-                    Confused? Open the
-                    <a href="documentation.html">Help and API documentation</a> page
-                </h3>
-            </div>
-            <div class="footer">
-                <h4>Made by Magnus Wolffelt and contributors</h4>
-                <h4>
-                    <a href="https://github.com/richdr/elevatorsaga">Source code</a> on GitHub - a
-                    fork of <a href="https://github.com/magwo/elevatorsaga">magwo/elevatorsaga</a>
-                </h4>
-            </div>
+                <section class="pane pane-code" id="pane-code" role="tabpanel">
+                    <div class="codestatus"></div>
+                    <div class="code" id="code"></div>
+                    <div class="symbolbar" aria-label="Insert characters"></div>
+                    <div class="codeactions">
+                        <button type="button" id="button_reset">Reset</button>
+                        <button type="button" id="button_resetundo">Undo reset</button>
+                        <span id="save_message" role="status"></span>
+                        <button type="button" id="button_save">Save</button>
+                        <button type="button" id="button_apply" class="primary">Apply</button>
+                    </div>
+                    <p class="codehint">
+                        Applying your code restarts the challenge and switches to the elevator view.
+                    </p>
+                </section>
+            </main>
+
+            <footer class="footer">
+                <p>
+                    Made by Magnus Wolffelt and contributors.
+                    <a href="https://github.com/richdr/elevatorsaga">Source</a> — a fork of
+                    <a href="https://github.com/magwo/elevatorsaga">magwo/elevatorsaga</a>
+                </p>
+            </footer>
         </div>
+
+        <dialog class="sheet" id="help_sheet" aria-label="Help and API documentation">
+            <div class="sheet_header">
+                <h2>Help &amp; API documentation</h2>
+                <button type="button" class="sheet_close" id="help_close" aria-label="Close">
+                    &times;
+                </button>
+            </div>
+            <div class="sheet_body" id="help_body"></div>
+        </dialog>
     </body>
 </html>

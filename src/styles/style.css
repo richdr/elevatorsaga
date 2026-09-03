@@ -1,127 +1,188 @@
 /*
  * Elevator Saga styles.
  *
- * Carried over from the original, with the Font Awesome `.fa` hooks replaced
- * by `.icon` for the inline SVG icons, and CodeMirror 5's `.CodeMirror` by
- * CodeMirror 6's `.cm-editor`. The responsive work lands in phase 3.
+ * Colours are the original's, lifted into custom properties so there can be a
+ * dark theme. Layout is rewritten to be responsive: one column that fills the
+ * viewport on a phone, with the world and the code editor as switchable panes,
+ * and the familiar stacked desktop layout from 900px up.
  */
+
+/* ---------------------------------------------------------------------------
+ * Theme
+ * ------------------------------------------------------------------------- */
+
+:root {
+    --page-bg: #bfbd9f;
+    /* Darker than the original's #555, which only reached 3.9:1 on this
+     * background. #444 clears 4.5:1 and is visually indistinguishable. */
+    --text: #444;
+    --text-strong: #2e2e28;
+    --text-muted: #55544a;
+    /* Light emphasis, for text sitting on the dark world. */
+    --emphasis: #f1f2d8;
+    --emphasis-shadow: #555;
+    /* Emphasis on the page background, where the light variant managed 1.67:1. */
+    --emphasis-page: #33301a;
+    --error: #dd5544;
+
+    --world-bg: #333;
+    --world-line: #333;
+    --floor-tint-a: rgba(255, 255, 255, 0.1);
+    --floor-tint-b: rgba(255, 255, 255, 0.2);
+    --floor-tint-c: rgba(255, 255, 255, 0.24);
+    --floor-number: rgba(255, 255, 255, 0.15);
+    --indicator-idle: rgba(255, 255, 255, 0.2);
+    --indicator-active: #33ff44;
+    --elevator-bg: #4f8686;
+    --elevator-border: #fff;
+    --user-color: #fff;
+
+    --stats-text: #999;
+    --stats-line: #444;
+
+    /* #333 on #777 was 2.82:1. A slightly darker chip with light text reads at
+     * 4.8:1 and keeps the original's grey. */
+    --button-bg: #6a6a62;
+    --button-text: #f5f4ea;
+    --button-border: #55554e;
+    --button-bg-hover: #787870;
+    --button-primary-bg: #4f8686;
+    --button-primary-text: #f1f2d8;
+    --button-primary-border: #3d6a6a;
+
+    --editor-border: #a9a892;
+    --editor-border-focus: #857f5f;
+
+    --focus-ring: #2c6e8f;
+
+    /* Solarized, for the documentation's code samples. */
+    --code-bg: #fdf6e3;
+    --code-text: #657b83;
+    --code-keyword: #859900;
+    --code-string: #2aa198;
+    --code-comment: #93a1a1;
+    --code-number: #d33682;
+    --code-name: #268bd2;
+    --code-literal: #b58900;
+
+    /* Minimum touch target, per the usual 44px guidance. */
+    --tap: 44px;
+    --radius: 6px;
+    --gap: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --page-bg: #2f2e29;
+        --text: #c9c7b4;
+        --text-strong: #e6e4d4;
+        --text-muted: #9a9884;
+        --emphasis: #f1f2d8;
+        --emphasis-page: #f1f2d8;
+        --emphasis-shadow: #000;
+
+        --world-bg: #1e1e1c;
+        --world-line: #111;
+        --floor-tint-a: rgba(255, 255, 255, 0.05);
+        --floor-tint-b: rgba(255, 255, 255, 0.11);
+        --floor-tint-c: rgba(255, 255, 255, 0.14);
+        --floor-number: rgba(255, 255, 255, 0.12);
+
+        --stats-text: #8d8b7c;
+        --stats-line: #3a3934;
+
+        --button-bg: #56554e;
+        --button-text: #f0eee0;
+        --button-border: #6b695f;
+        --button-bg-hover: #63625a;
+
+        --editor-border: #4a4943;
+        --editor-border-focus: #6f6d62;
+
+        --focus-ring: #6fb3d2;
+
+        --code-bg: #002b36;
+        --code-text: #839496;
+        --code-comment: #586e75;
+    }
+}
+
+/* ---------------------------------------------------------------------------
+ * Base
+ * ------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
 
 html,
 body {
-    background-color: #bfbd9f;
-    color: white;
     margin: 0;
     padding: 0;
+    background-color: var(--page-bg);
+    color: var(--text);
 }
 
 body {
     font-family: Oswald, Arial, Helvetica, sans-serif;
+    /* Stop iOS Safari inflating text in landscape. */
+    -webkit-text-size-adjust: 100%;
 }
+
 h1,
 h2,
 h3,
 h4,
 h5 {
-    margin-top: 0.4em;
-    margin-bottom: 0.3em;
+    margin: 0.4em 0 0.3em;
+    color: var(--text);
+    font-weight: normal;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
+h1 {
+    font-weight: 700;
+}
+
 p {
-    color: #555;
-}
-
-.emphasis-color {
-    color: #f1f2d8;
-    text-shadow: 0 2px 0.4pt #555;
-}
-
-.error-color {
-    color: #d54;
+    color: var(--text);
 }
 
 a {
-    color: #444;
+    color: var(--text-strong);
     font-weight: bold;
     text-decoration: none;
 }
+
 a:hover {
     text-decoration: underline;
 }
 
-h2,
-h3,
-h4,
-h5 {
-    font-weight: normal;
+.emphasis-color {
+    color: var(--emphasis);
+    text-shadow: 0 2px 0.4pt var(--emphasis-shadow);
 }
 
-dl {
-    color: #555;
-}
-dl dd {
-    font:
-        15px Arial,
-        Helvetica,
-        sans-serif;
-    margin-bottom: 1em;
-    margin-left: 1em;
-    width: 40%;
+/* On the page background the light emphasis colour is unreadable, so it becomes
+ * a darker accent instead, carrying the emphasis with weight rather than glow. */
+.challengetitle .emphasis-color,
+.timescale .emphasis-color,
+.help .emphasis-color,
+.sheet_body .emphasis-color {
+    color: var(--emphasis-page);
+    font-weight: 700;
+    text-shadow: none;
 }
 
-.container {
-    width: 1220px;
-    margin: 0 auto;
-    padding: 20px 0 40px 0;
-    background-color: #bfbd9f;
+.error-color {
+    color: var(--error);
 }
 
 .unselectable {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
     user-select: none;
-}
-
-button {
-    height: 30px;
-    line-height: 16px;
-    font-size: 16px;
-    font-weight: bold;
-    padding-left: 10px;
-    padding-right: 10px;
-    color: #333;
-    background-color: #777;
-    text-shadow: 0 0 3px #aaa;
-    border: 1px solid #666;
-    border-radius: 5px;
-    margin-right: 5px;
-}
-
-button.right {
-    margin-left: 5px;
-    margin-right: 0;
-}
-
-.blink {
-    animation: blink 0.5s steps(3, start) infinite;
-    -webkit-animation: blink 0.5s steps(3, start) infinite;
-}
-@keyframes blink {
-    to {
-        visibility: hidden;
-    }
-}
-@-webkit-keyframes blink {
-    to {
-        visibility: hidden;
-    }
 }
 
 .invisible {
@@ -132,130 +193,290 @@ button.right {
     opacity: 0.4;
 }
 
-#save_message,
-#fitness_message {
-    color: #555;
-    font-size: 12px;
-    line-height: 30px;
-    margin: 0 20px;
+:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
 }
 
-.left {
-    float: left;
+/* ---------------------------------------------------------------------------
+ * Buttons
+ * ------------------------------------------------------------------------- */
+
+button {
+    min-height: 32px;
+    padding: 6px 12px;
+    font: inherit;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1.2;
+    color: var(--button-text);
+    background-color: var(--button-bg);
+    border: 1px solid var(--button-border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    /* No 300ms tap delay, and no double-tap-to-zoom on controls. */
+    touch-action: manipulation;
 }
 
-.right {
-    float: right;
+button:hover {
+    background-color: var(--button-bg-hover);
 }
 
-.header {
-    height: 60px;
+button.primary {
+    color: var(--button-primary-text);
+    background-color: var(--button-primary-bg);
+    border-color: var(--button-primary-border);
 }
 
-.header h1 {
-    line-height: 50px;
-    margin: 0;
+/* A button that is nothing but an icon - no chrome, inherits its colour so the
+ * `.activated` rules keep working. */
+.iconbutton {
+    min-height: 0;
     padding: 0;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    line-height: inherit;
+    text-shadow: none;
+    cursor: pointer;
+    touch-action: manipulation;
 }
 
-.header a {
-    display: inline-block;
-    margin-left: 15px;
-    font-size: 20px;
-    line-height: 50px;
-    padding: 0 4px;
+.iconbutton:hover {
+    background: none;
 }
 
-.timescale_decrease,
-.timescale_increase {
-    padding: 4px;
-    line-height: 20px;
+.linkbutton {
+    min-height: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--text-strong);
+    font: inherit;
+    font-weight: bold;
     cursor: pointer;
 }
 
-.timescale_increase {
-    margin-right: 10px;
+.linkbutton:hover {
+    background: none;
+    text-decoration: underline;
 }
 
-.codestatus {
-    padding-top: 10px;
+/* ---------------------------------------------------------------------------
+ * Icons
+ * ------------------------------------------------------------------------- */
+
+.icon {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
 }
 
-.cm-editor {
-    width: 1220px;
-    margin: 10px auto;
-    height: 320px;
-    border: 1px solid #a9a892;
+.blink {
+    animation: blink 0.5s steps(3, start) infinite;
 }
 
-.cm-editor.cm-focused {
-    outline: none;
-    border-color: #857f5f;
+@keyframes blink {
+    to {
+        visibility: hidden;
+    }
 }
 
+/* ---------------------------------------------------------------------------
+ * Shell
+ * ------------------------------------------------------------------------- */
+
+.container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+.header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--gap);
+}
+
+.title {
+    margin: 0;
+    font-size: clamp(20px, 4.5vw, 34px);
+    color: var(--text);
+}
+
+.title em {
+    font-size: 0.62em;
+}
+
+.headerlinks {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 18px;
+}
+
+.footer {
+    margin-top: 20px;
+    font-size: 13px;
+}
+
+.footer p {
+    margin: 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * Challenge bar
+ * ------------------------------------------------------------------------- */
+
+/* The bar is rendered by script; reserving its height stops the panes below
+ * from jumping once it appears. */
+.challenge {
+    min-height: 40px;
+    margin: 10px 0;
+}
+
+.challengebar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gap);
+    min-height: 40px;
+}
+
+.challengetitle {
+    margin: 0;
+    font-size: clamp(15px, 3.6vw, 20px);
+}
+
+.challengecontrols {
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+    margin-left: auto;
+}
+
+.startstop {
+    min-width: 104px;
+    min-height: var(--tap);
+}
+
+.timescale {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    color: var(--text);
+}
+
+.timescale .iconbutton {
+    display: grid;
+    place-items: center;
+    width: var(--tap);
+    height: var(--tap);
+    font-size: 20px;
+}
+
+.timescale_value {
+    display: inline-block;
+    min-width: 30px;
+    text-align: center;
+    font-size: 20px;
+}
+
+/* ---------------------------------------------------------------------------
+ * View toggle - the code/elevator switch. Only shown on narrow screens, where
+ * the two panes cannot usefully share the display.
+ * ------------------------------------------------------------------------- */
+
+.viewtoggle {
+    display: none;
+    margin-bottom: 10px;
+    border: 1px solid var(--button-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.viewtoggle_option {
+    flex: 1;
+    min-height: var(--tap);
+    border: none;
+    border-radius: 0;
+    background-color: transparent;
+    color: var(--text);
+}
+
+.viewtoggle_option + .viewtoggle_option {
+    border-left: 1px solid var(--button-border);
+}
+
+.viewtoggle_option[aria-selected="true"] {
+    background-color: var(--button-bg);
+    color: var(--button-text);
+}
+
+/* ---------------------------------------------------------------------------
+ * Panes
+ * ------------------------------------------------------------------------- */
+
+.pane {
+    min-width: 0;
+}
+
+.pane-code {
+    margin-top: 12px;
+}
+
+/* ---------------------------------------------------------------------------
+ * World
+ * ------------------------------------------------------------------------- */
+
+/* A floor is 50px; three of them is the smallest challenge. Reserving that much
+ * keeps the load from shifting once the world is measured. */
 .world {
     position: relative;
-    width: 1220px;
-    background-color: #333;
-    padding: 0;
+    min-height: 150px;
+    display: flex;
+    flex-wrap: wrap;
+    background-color: var(--world-bg);
     overflow: hidden;
+}
+
+/* Scrollable window onto the world. The world itself keeps the engine's fixed
+ * pixel geometry and is scaled to fit, so no gameplay maths changes. */
+.worldviewport {
+    flex: 1 1 620px;
+    min-width: 0;
+    display: grid;
+    place-content: center;
+    overflow: auto;
+    overscroll-behavior: contain;
+    border-right: 1px solid var(--world-line);
+    border-left: 1px solid var(--world-line);
+}
+
+/* Carries the *scaled* footprint, since a transform does not affect layout. */
+.worldsizer {
+    position: relative;
+}
+
+.worldscaler {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: top left;
 }
 
 .innerworld {
     position: relative;
+    width: 100%;
     height: 100%;
-    width: 938px;
-    border-right: 1px solid black;
-    border-left: 1px solid black;
     font-family: Arial, Helvetica, sans-serif;
-}
-
-.statscontainer {
-    font:
-        12px Consolas,
-        Monaco,
-        monospace;
-    line-height: 10px;
-    color: #999;
-    position: absolute;
-    top: 0;
-    right: 0px;
-    width: 240px;
-    height: 200px;
-    padding: 20px;
-    z-index: 1;
-}
-
-.statscontainer div {
-    border-bottom: 1px solid #444;
-}
-
-.statscontainer div,
-.statscontainer span {
-    position: absolute;
-    display: block;
-    width: 240px;
-    height: 10px;
-}
-
-.statscontainer .value {
-    text-align: right;
-}
-
-.feedbackcontainer {
-    position: absolute;
-}
-
-.feedback {
-    position: absolute;
-    width: 1280px;
-    height: 2000px;
-    padding-top: 20px;
-    line-height: 20px;
-    text-align: center;
-    background-color: rgba(44, 44, 44, 0.6);
-    z-index: 5;
-    overflow: hidden;
 }
 
 .movable {
@@ -266,12 +487,10 @@ button.right {
 }
 
 .user {
-    color: white;
+    color: var(--user-color);
     text-shadow: 0 1px 3px black;
     z-index: 2;
-}
-
-.user.happy {
+    font-size: 14px;
 }
 
 .user.frustrated {
@@ -287,8 +506,8 @@ button.right {
 }
 
 .elevator {
-    background-color: #4f8686;
-    border: 2px solid white;
+    background-color: var(--elevator-bg);
+    border: 2px solid var(--elevator-border);
     height: 46px;
     z-index: 1;
 }
@@ -308,11 +527,11 @@ button.right {
 }
 
 .elevator .directionindicator .icon {
-    color: rgba(255, 255, 255, 0.2);
+    color: var(--indicator-idle);
 }
 
 .elevator .directionindicator .icon.activated {
-    color: #33ff44;
+    color: var(--indicator-active);
 }
 
 .elevator .floorindicator {
@@ -334,164 +553,601 @@ button.right {
     line-height: 8px;
     color: rgba(255, 255, 255, 0.3);
 }
+
 .elevator .buttonpress {
     cursor: pointer;
     margin: 0;
     display: inline-block;
 }
+
 .elevator .buttonpress.activated {
-    color: #33ff44;
+    color: var(--indicator-active);
 }
 
 .floor {
     position: absolute;
     width: 100%;
     height: 49px;
-    background-color: rgba(255, 255, 255, 0.1);
     background: linear-gradient(
-        rgba(255, 255, 255, 0.1),
-        rgba(255, 255, 255, 0.2),
-        rgba(255, 255, 255, 0.24),
-        rgba(255, 255, 255, 0.1)
-    ); /* Standard syntax */
-    border-bottom: 1px solid #333;
+        var(--floor-tint-a),
+        var(--floor-tint-b),
+        var(--floor-tint-c),
+        var(--floor-tint-a)
+    );
+    border-bottom: 1px solid var(--world-line);
 }
 
 .floor .buttonindicator {
-    cursor: pointer;
-    line-height: 50px;
+    display: flex;
+    align-items: center;
+    height: 50px;
     padding-left: 50px;
-    color: rgba(255, 255, 255, 0.2);
+    color: var(--indicator-idle);
 }
+
+.floor .buttonindicator .iconbutton {
+    display: grid;
+    place-items: center;
+    /* The visible glyph stays 14px; the hit area is deliberately larger. */
+    width: 34px;
+    height: 40px;
+    font-size: 14px;
+}
+
 .floor .buttonindicator .activated {
-    color: rgba(55, 255, 55, 1);
+    color: var(--indicator-active);
 }
 
 .floor .floornumber {
     position: absolute;
-    color: rgba(255, 255, 255, 0.15);
+    color: var(--floor-number);
     font-size: 32px;
     line-height: 50px;
     padding-left: 10px;
 }
 
-.footer {
-    margin-top: 20px;
+/* ---------------------------------------------------------------------------
+ * Stats
+ * ------------------------------------------------------------------------- */
+
+.statscontainer {
+    flex: 0 0 240px;
+    display: grid;
+    grid-template-columns: 1fr;
+    align-content: start;
+    gap: 2px;
+    padding: 16px;
+    font:
+        12px ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Consolas,
+        monospace;
+    color: var(--stats-text);
 }
-.footer h4 {
-    font-size: 13px;
+
+.stat {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid var(--stats-line);
 }
+
+.stat .value {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Tap-to-reveal, so the explanation is not hover-only. */
+.hint {
+    min-height: 0;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    font-size: 11px;
+    line-height: 1;
+    border-radius: 50%;
+    background: none;
+    border: 1px solid var(--stats-line);
+    color: var(--stats-text);
+}
+
+.hint:hover {
+    background: none;
+}
+
+.hint[aria-expanded="true"]::after,
+.hint:hover::after {
+    content: attr(data-hint);
+    position: absolute;
+    z-index: 6;
+    max-width: 220px;
+    margin-left: 8px;
+    padding: 6px 8px;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border-radius: var(--radius);
+    font-size: 11px;
+    text-align: left;
+}
+
+/* ---------------------------------------------------------------------------
+ * Challenge feedback overlay
+ * ------------------------------------------------------------------------- */
+
+.feedbackcontainer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.feedback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 16px;
+    text-align: center;
+    background-color: rgba(44, 44, 44, 0.72);
+    pointer-events: auto;
+}
+
+.feedback h2 {
+    margin: 0;
+    font-size: clamp(22px, 6vw, 32px);
+}
+
+.feedback p {
+    margin: 0;
+    font-size: clamp(14px, 3.6vw, 18px);
+}
+
+.feedback a {
+    min-height: var(--tap);
+    display: inline-flex;
+    align-items: center;
+    font-size: clamp(15px, 4vw, 20px);
+}
+
+/* ---------------------------------------------------------------------------
+ * Code pane
+ * ------------------------------------------------------------------------- */
+
+.codestatus:not(:empty) {
+    padding-bottom: 6px;
+}
+
+.codestatus h5 {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.code {
+    display: flex;
+    flex-direction: column;
+    /* Reserve the editor's height before CodeMirror mounts, so it does not
+     * shove the page around on load. */
+    min-height: 322px;
+}
+
+.cm-editor {
+    height: 320px;
+    border: 1px solid var(--editor-border);
+    border-radius: var(--radius);
+}
+
+.cm-editor.cm-focused {
+    outline: none;
+    border-color: var(--editor-border-focus);
+}
+
+/* Row of characters that are awkward to reach on a phone keyboard. */
+.symbolbar {
+    display: none;
+    gap: 6px;
+    margin-top: 8px;
+    padding-bottom: 4px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+}
+
+.symbolbar button {
+    flex: 0 0 auto;
+    min-width: var(--tap);
+    min-height: var(--tap);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.codeactions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--gap);
+    margin-top: 10px;
+}
+
+.codeactions button {
+    min-height: var(--tap);
+}
+
+#save_message {
+    margin-left: auto;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.codehint {
+    margin: 8px 0 0;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Help sheet
+ * ------------------------------------------------------------------------- */
+
+.sheet {
+    width: min(900px, 100%);
+    max-width: none;
+    max-height: 100dvh;
+    height: 100dvh;
+    margin: 0 0 0 auto;
+    padding: 0;
+    border: none;
+    background-color: var(--page-bg);
+    color: var(--text);
+}
+
+.sheet::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.sheet_header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gap);
+    padding: 12px 16px;
+    background-color: var(--page-bg);
+    border-bottom: 1px solid var(--stats-line);
+}
+
+.sheet_header h2 {
+    margin: 0;
+    font-size: clamp(17px, 4vw, 22px);
+}
+
+.sheet_close {
+    width: var(--tap);
+    height: var(--tap);
+    font-size: 24px;
+    line-height: 1;
+}
+
+.sheet_body {
+    padding: 0 16px calc(24px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    max-height: calc(100dvh - 60px);
+    overscroll-behavior: contain;
+}
+
+/* ---------------------------------------------------------------------------
+ * Documentation content, shared by the help sheet and documentation.html
+ * ------------------------------------------------------------------------- */
 
 .help {
     margin-top: 20px;
     margin-bottom: 30px;
 }
 
-.help p {
-    max-width: 75%;
+.help p,
+.help dl {
+    max-width: 72ch;
+}
+
+.help pre {
+    overflow-x: auto;
+    border-radius: var(--radius);
+}
+
+dl {
+    color: var(--text);
+}
+
+dl dd {
+    font:
+        15px Arial,
+        Helvetica,
+        sans-serif;
+    margin-bottom: 1em;
+    margin-left: 1em;
+    max-width: 60ch;
 }
 
 .doctable {
-    margin-top: 10px;
-    margin-bottom: 20px;
-    color: #555;
+    width: 100%;
+    margin: 10px 0 20px;
+    color: var(--text);
     border: none;
+    border-collapse: collapse;
 }
 
 .doctable th,
 .doctable td {
     text-align: left;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 4px 6px 4px 0;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.25);
+    vertical-align: top;
 }
 
 .doctable tr td:first-child {
-    padding-right: 5px;
-    color: #333;
+    color: var(--text-strong);
 }
 
 .doctable td {
     font:
-        13px Consolas,
-        Monaco,
+        13px ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Consolas,
         monospace;
 }
 
-/* ---------------------------------------------------------------------------
- * Inline SVG icons, replacing the Font Awesome icon font
- * ------------------------------------------------------------------------- */
-
-.icon {
-    display: inline-block;
-    width: 1em;
-    height: 1em;
-    vertical-align: -0.125em;
-}
-
-/* A button that is nothing but an icon - no chrome, inherits its colour so the
- * `.activated` rules keep working. */
-.iconbutton {
-    height: auto;
-    padding: 0;
-    margin: 0;
-    border: none;
-    border-radius: 0;
-    background: none;
-    color: inherit;
-    font: inherit;
-    line-height: inherit;
-    text-shadow: none;
-    cursor: pointer;
+/* Let wide API tables scroll rather than squash on a phone. */
+.doctablewrap {
+    overflow-x: auto;
 }
 
 /* ---------------------------------------------------------------------------
- * Challenge bar
+ * Code sample highlighting
+ *
+ * The handful of highlight.js token classes the JavaScript samples actually
+ * produce, coloured from the same Solarized palette as the editor. Cheaper than
+ * shipping two full highlight.js themes, and it follows the colour scheme.
  * ------------------------------------------------------------------------- */
 
-.challengebar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    height: 40px;
+.help pre,
+.sheet_body pre {
+    padding: 10px 12px;
+    background-color: var(--code-bg);
+    color: var(--code-text);
+    font:
+        13px/1.5 ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Consolas,
+        monospace;
 }
 
-.challengetitle {
-    margin: 0;
+.hljs-keyword,
+.hljs-operator {
+    color: var(--code-keyword);
 }
 
-.challengecontrols {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.hljs-string,
+.hljs-regexp {
+    color: var(--code-string);
 }
 
-.startstop {
-    min-width: 110px;
+.hljs-comment {
+    color: var(--code-comment);
+    font-style: italic;
 }
 
-.timescale {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    color: #555;
-    font-size: 20px;
+.hljs-number {
+    color: var(--code-number);
 }
 
-.timescale_value {
-    display: inline-block;
-    width: 22px;
-    text-align: center;
-    font-size: 20px;
+.hljs-title,
+.hljs-title.function_,
+.hljs-attr,
+.hljs-property {
+    color: var(--code-name);
+}
+
+.hljs-literal,
+.hljs-built_in,
+.hljs-type {
+    color: var(--code-literal);
 }
 
 /* ---------------------------------------------------------------------------
  * Fullscreen demo mode (#fullscreen URL parameter)
  * ------------------------------------------------------------------------- */
 
-body.fullscreen-demo,
-body.fullscreen-demo .container,
+body.fullscreen-demo .container {
+    max-width: none;
+    padding: 0;
+}
+
 body.fullscreen-demo .world {
     width: 100%;
-    margin: 0;
-    padding: 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * Narrow screens: one pane at a time, filling the viewport
+ * ------------------------------------------------------------------------- */
+
+@media (max-width: 899px) {
+    body {
+        /* dvh, so iOS Safari's collapsing toolbars do not clip the controls. */
+        height: 100dvh;
+        overflow: hidden;
+    }
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        height: 100dvh;
+        padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+        padding-left: calc(12px + env(safe-area-inset-left));
+        padding-right: calc(12px + env(safe-area-inset-right));
+        overflow: hidden;
+    }
+
+    .title em {
+        display: none;
+    }
+
+    /* Header links are controls too - make them thumb-sized. */
+    .headerlinks a,
+    .headerlinks .linkbutton {
+        display: inline-flex;
+        align-items: center;
+        min-height: var(--tap);
+        padding: 0 4px;
+    }
+
+    .challenge {
+        min-height: var(--tap);
+        margin: 6px 0;
+    }
+
+    .viewtoggle {
+        display: flex;
+    }
+
+    .panes {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .pane {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .pane-code {
+        margin-top: 0;
+    }
+
+    body[data-view="world"] .pane-code,
+    body[data-view="code"] .pane-world {
+        display: none;
+    }
+
+    .world {
+        flex: 1;
+        min-height: 0;
+        flex-direction: column;
+        flex-wrap: nowrap;
+    }
+
+    .worldviewport {
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+
+    .statscontainer {
+        flex: 0 0 auto;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 16px;
+        padding: 10px 12px;
+    }
+
+    /* The editor takes the leftover height, so the symbol bar and the action
+     * row are never pushed off the bottom of the viewport. */
+    .code {
+        flex: 1;
+        min-height: 0;
+    }
+
+    .cm-editor {
+        flex: 1;
+        height: auto;
+        min-height: 0;
+    }
+
+    .symbolbar {
+        display: flex;
+    }
+
+    .codeactions {
+        margin-top: 8px;
+    }
+
+    #button_apply {
+        flex: 1 1 auto;
+    }
+
+    .footer,
+    .codehint {
+        display: none;
+    }
+
+    /* Shrink the layout to the space the on-screen keyboard leaves, so the
+     * symbol bar and the action row stay reachable while typing. */
+    body.keyboard-open .container {
+        height: calc(100dvh - var(--keyboard-inset, 0px));
+    }
+}
+
+/* Landscape on a phone: the pane is short, so give the stats less of it. */
+@media (max-width: 899px) and (max-height: 540px) {
+    .statscontainer {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+
+    .header,
+    .viewtoggle {
+        margin-bottom: 4px;
+    }
+}
+
+/* Narrow enough that the challenge title and its controls need separate rows,
+ * so reserve both. Wider than this - a phone in landscape - they fit on one. */
+@media (max-width: 599px) {
+    .challenge {
+        min-height: 76px;
+    }
+}
+
+@media (max-width: 480px) {
+    .statscontainer {
+        font-size: 11px;
+    }
+
+    .headerlinks {
+        font-size: 16px;
+    }
+}
+
+/* On a phone the gutter is a luxury the width cannot afford. */
+@media (max-width: 599px) {
+    .cm-editor .cm-gutters {
+        display: none;
+    }
+}
+
+/* ---------------------------------------------------------------------------
+ * Motion
+ * ------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .blink {
+        animation: none;
+    }
 }

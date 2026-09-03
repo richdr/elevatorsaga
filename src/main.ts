@@ -16,13 +16,32 @@ import {
     presentWorld,
 } from "./ui/presenters";
 import { createParamsUrl, onRoute, type RouteParams } from "./ui/router";
-import { qs, qsa } from "./ui/dom";
+import { qs } from "./ui/dom";
+import {
+    createViewToggle,
+    createWorldScaler,
+    installHints,
+    installKeyboardInset,
+    type WorldMetrics,
+} from "./ui/layout";
+import { installSymbolBar } from "./ui/symbolbar";
+import { installHelpSheet } from "./ui/helpsheet";
 
 const TIMESCALE_KEY = "elevatorTimeScale";
+
+/** Horizontal room the original reserved for the world, in engine pixels. */
+const MIN_WORLD_WIDTH = 938;
+
+/** Space past the rightmost elevator for people leaving it. */
+const WALK_OUT_ROOM = 140;
 
 installUserCodeGlobals();
 
 const worldElem = qs(".innerworld");
+const worldViewport = qs(".worldviewport");
+const worldSizerElem = qs(".worldsizer");
+const worldScalerElem = qs(".worldscaler");
+const worldPane = qs(".pane-world");
 const statsElem = qs(".statscontainer");
 const feedbackElem = qs(".feedbackcontainer");
 const challengeElem = qs(".challenge");
@@ -30,6 +49,22 @@ const codeStatusElem = qs(".codestatus");
 const saveMessageElem = qs("#save_message");
 
 const editor = new CodeEditor(qs("#code"));
+const view = createViewToggle();
+const worldScaler = createWorldScaler(
+    worldViewport,
+    worldSizerElem,
+    worldScalerElem,
+    worldPane,
+    statsElem,
+);
+
+installSymbolBar(editor);
+installHelpSheet();
+installHints();
+installKeyboardInset();
+
+// The world is only measurable once it is on screen, so re-fit when it appears.
+view.onChange(() => worldScaler.refresh());
 
 const worldController = new WorldController(1.0 / 60.0);
 worldController.on("usercode_error", (e) => {
@@ -48,7 +83,25 @@ const app = {
         } else {
             worldController.setPaused(!worldController.isPaused);
         }
+        // Watching is the point of pressing start.
+        view.set("world");
     },
+};
+
+/**
+ * The world's coordinate space. The original hardcoded 938px; this widens to
+ * whatever the elevators actually need, so a future challenge with more or
+ * wider elevators cannot run off the edge.
+ */
+const measureWorld = (w: World): WorldMetrics => {
+    const rightmost = Math.max(0, ...w.elevators.map((e) => e.x + e.width));
+    return {
+        width: Math.max(MIN_WORLD_WIDTH, rightmost + 20),
+        // Room for the people who walk out of the rightmost elevator: `handleExit`
+        // sends them 100px further, and they need a little space after that.
+        tightWidth: Math.min(MIN_WORLD_WIDTH, rightmost + WALK_OUT_ROOM),
+        height: w.floors.length * w.floorHeight,
+    };
 };
 
 const startChallenge = (challengeIndex: number, autoStart?: boolean): void => {
@@ -61,6 +114,7 @@ const startChallenge = (challengeIndex: number, autoStart?: boolean): void => {
     presentStats(statsElem, world);
     presentChallenge(challengeElem, challenge, app, world, worldController, challengeIndex + 1);
     presentWorld(worldElem, world);
+    worldScaler.setMetrics(measureWorld(world));
 
     world.on("stats_changed", () => {
         const challengeStatus = challenge.condition.evaluate(world!);
@@ -91,6 +145,21 @@ const startChallenge = (challengeIndex: number, autoStart?: boolean): void => {
     }
 };
 
+// Registered once, not per challenge: the controller outlives every world.
+worldController.on("timescale_changed", () => {
+    localStorage.setItem(TIMESCALE_KEY, String(worldController.timeScale));
+    if (world) {
+        presentChallenge(
+            challengeElem,
+            challenges[currentChallengeIndex],
+            app,
+            world,
+            worldController,
+            currentChallengeIndex + 1,
+        );
+    }
+});
+
 qs("#button_apply").addEventListener("click", () => editor.trigger("apply_code"));
 qs("#button_save").addEventListener("click", () => {
     editor.save();
@@ -109,34 +178,22 @@ qs("#button_resetundo").addEventListener("click", () => {
     editor.focus();
 });
 
-// Registered once, not per challenge: the controller outlives every world.
-worldController.on("timescale_changed", () => {
-    localStorage.setItem(TIMESCALE_KEY, String(worldController.timeScale));
-    if (world) {
-        presentChallenge(
-            challengeElem,
-            challenges[currentChallengeIndex],
-            app,
-            world,
-            worldController,
-            currentChallengeIndex + 1,
-        );
-    }
+editor.on("apply_code", () => {
+    // Applying means "run it" - show the run.
+    view.set("world");
+    startChallenge(currentChallengeIndex, true);
 });
-
-editor.on("apply_code", () => startChallenge(currentChallengeIndex, true));
 editor.on("code_success", () => presentCodeStatus(codeStatusElem));
-editor.on("usercode_error", (error) => presentCodeStatus(codeStatusElem, error));
+editor.on("usercode_error", (error) => {
+    presentCodeStatus(codeStatusElem, error);
+    // The error is only actionable next to the code that caused it.
+    view.set("code");
+});
 editor.on("saved", (at: Date) => {
-    saveMessageElem.textContent = "Code saved " + at.toTimeString();
+    saveMessageElem.textContent = "Saved " + at.toLocaleTimeString();
 });
 
 const makeDemoFullscreen = (): void => {
-    for (const child of qsa(".container > *")) {
-        if (!child.classList.contains("world")) {
-            child.style.visibility = "hidden";
-        }
-    }
     document.body.classList.add("fullscreen-demo");
 };
 
