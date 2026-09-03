@@ -9,7 +9,7 @@ The upstream README invites forks, and the original keeps the `elevatorsaga.com`
 domain — this fork is published on GitHub Pages instead.
 
 **Play the original:** [play.elevatorsaga.com](http://play.elevatorsaga.com/)
-**Play this fork:** _coming soon — GitHub Pages, see [PLAN.md](PLAN.md) phase 2_
+**Play this fork:** [richdr.github.io/elevatorsaga](https://richdr.github.io/elevatorsaga/)
 
 ![Image of Elevator Saga in browser](images/screenshot.png)
 
@@ -23,7 +23,7 @@ Three things, in order:
    so it is effectively unusable on a phone. The centrepiece is a toggle between the
    **code editor** and the **elevator shaft** view, since the two cannot usefully share
    a phone screen.
-3. **Continuous deployment** to GitHub Pages via GitHub Actions.
+3. **Continuous deployment** to GitHub Pages via GitHub Actions. _Done._
 
 The simulation itself — the elevator, floor, user and world model, the 19 challenges and
 their fitness conditions — is upstream's design and stays behaviourally identical.
